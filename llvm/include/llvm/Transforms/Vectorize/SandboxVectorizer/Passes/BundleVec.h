@@ -55,7 +55,6 @@ private:
   /// Creates and returns a vector instruction that replaces the instructions in
   /// \p Bndl. \p Operands are the already vectorized operands.
   Value *createVectorInstr(ArrayRef<Value *> Bndl, ArrayRef<Value *> Operands);
-
   /// Creates a shuffle instruction that shuffles \p VecOp according to \p Mask.
   /// \p UserBB is the block of the user bundle.
   Value *createShuffle(Value *VecOp, const ShuffleMask &Mask,
