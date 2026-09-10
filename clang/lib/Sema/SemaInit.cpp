@@ -1943,7 +1943,8 @@ void InitListChecker::CheckVectorType(const InitializedEntity &Entity,
     return;
   }
 
-  if (!SemaRef.getLangOpts().OpenCL && !SemaRef.getLangOpts().HLSL ) {
+  if (!SemaRef.getLangOpts().OpenCL && !SemaRef.getLangOpts().HLSL &&
+      !SemaRef.getLangOpts().MetalBootstrap) {
     // If the initializing element is a vector, try to copy-initialize
     // instead of breaking it apart (which is doomed to failure anyway).
     Expr *Init = IList->getInit(Index);
@@ -2041,7 +2042,7 @@ void InitListChecker::CheckVectorType(const InitializedEntity &Entity,
   InitializedEntity ElementEntity =
     InitializedEntity::InitializeElement(SemaRef.Context, 0, Entity);
 
-  // OpenCL and HLSL initializers allow vectors to be constructed from vectors.
+  // OpenCL, HLSL and Metal initializers allow concatenating vector components.
   for (unsigned i = 0; i < maxElements; ++i) {
     // Don't attempt to go past the end of the init list
     if (Index >= IList->getNumInits())
@@ -2071,7 +2072,10 @@ void InitListChecker::CheckVectorType(const InitializedEntity &Entity,
   }
 
   // OpenCL and HLSL require all elements to be initialized.
-  if (numEltsInit != maxElements) {
+  // Metal permits partial brace initialization; functional constructors check
+  // their component count separately in BuildCXXTypeConstructExpr.
+  if (numEltsInit > maxElements ||
+      (numEltsInit != maxElements && !SemaRef.getLangOpts().MetalBootstrap)) {
     if (!VerifyOnly)
       SemaRef.Diag(IList->getBeginLoc(),
                    diag::err_vector_incorrect_num_elements)
@@ -8401,7 +8405,9 @@ ExprResult InitializationSequence::Perform(Sema &S,
       CurInit = CurInitExprRes;
 
       if (Step->Kind == SK_ConversionSequenceNoNarrowing &&
-          S.getLangOpts().CPlusPlus)
+          S.getLangOpts().CPlusPlus &&
+          !(S.getLangOpts().MetalBootstrap && Entity.getParent() &&
+            Entity.getParent()->getType()->isExtVectorType()))
         DiagnoseNarrowingInInitList(S, *Step->ICS, SourceType, Entity.getType(),
                                     CurInit.get());
 

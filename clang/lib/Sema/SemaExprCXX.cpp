@@ -1607,6 +1607,32 @@ Sema::BuildCXXTypeConstructExpr(TypeSourceInfo *TInfo,
         Context, Ty.getNonReferenceType(), TInfo, LParenOrBraceLoc, Exprs,
         RParenOrBraceLoc, ListInitialization);
 
+  // Metal's multi-argument vector constructors concatenate scalar/vector
+  // components. Keep this experimental extension isolated from ordinary C++.
+  Expr *MetalVectorInit = nullptr;
+  if (getLangOpts().MetalBootstrap && Ty->isExtVectorType() &&
+      !ListInitialization && Exprs.size() > 1) {
+    unsigned Components = 0;
+    for (Expr *Arg : Exprs) {
+      const auto *Vector = Arg->getType()->getAs<VectorType>();
+      Components += Vector ? Vector->getNumElements() : 1;
+    }
+    unsigned Expected = Ty->castAs<VectorType>()->getNumElements();
+    if (Components != Expected)
+      return ExprError(Diag(LParenOrBraceLoc,
+                            diag::err_vector_incorrect_num_elements)
+                       << (Components < Expected) << Expected << Components
+                       << /*initialization*/ 0);
+    MetalVectorInit = new (Context)
+        InitListExpr(Context, LParenOrBraceLoc, Exprs, RParenOrBraceLoc,
+                     /*isExplicit=*/false);
+    MetalVectorInit->setType(Ty);
+    Exprs = MultiExprArg(&MetalVectorInit, 1);
+    Kind = InitializationKind::CreateDirectList(TyBeginLoc, LParenOrBraceLoc,
+                                               RParenOrBraceLoc);
+    ListInitialization = true;
+  }
+
   // C++ [expr.type.conv]p1:
   // If the expression list is a parenthesized single expression, the type
   // conversion expression is equivalent (in definedness, and if defined in

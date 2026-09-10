@@ -2128,6 +2128,10 @@ defm define_target_os_macros : OptInCC1FFlag<"define-target-os-macros",
 def fparse_all_comments : Flag<["-"], "fparse-all-comments">, Group<f_clang_Group>,
   Visibility<[ClangOption, CC1Option]>,
   MarshallingInfoFlag<LangOpts<"CommentOpts.ParseAllComments">>;
+def fmetal_bootstrap : Flag<["-"], "fmetal-bootstrap">,
+  Visibility<[CC1Option]>,
+  HelpText<"Enable experimental Metal vector constructors (not a complete Metal language mode)">,
+  MarshallingInfoFlag<LangOpts<"MetalBootstrap">>;
 def frecord_command_line : Flag<["-"], "frecord-command-line">,
   DocBrief<[{Generate a section named ".GCC.command.line" containing the
 driver command-line. After linking, the section may contain multiple command
