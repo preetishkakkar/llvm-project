@@ -1063,13 +1063,18 @@ NumericLiteralParser::NumericLiteralParser(StringRef TokSpelling,
     case 'h':      // FP Suffix for "half".
     case 'H':
       // OpenCL Extension v1.2 s9.5 - h or H suffix for half type.
-      if (!(LangOpts.Half || LangOpts.FixedPoint))
+      // Metal spells half literals the same way; there half is the native
+      // _Float16 type, so the literal takes the f16 path.
+      if (!(LangOpts.Half || LangOpts.FixedPoint || LangOpts.Metal))
         break;
       if (isIntegerLiteral()) break;  // Error for integer constant.
       if (HasSize)
         break;
       HasSize = true;
-      isHalf = true;
+      if (LangOpts.Metal)
+        isFloat16 = true;
+      else
+        isHalf = true;
       continue;  // Success.
     case 'f':      // FP Suffix for "float"
     case 'F':

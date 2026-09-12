@@ -126,3 +126,13 @@ constexpr int gated() {
 }
 
 #endif
+
+#ifndef PLAIN_CPP
+// Half literals: the h/H suffix spells a half literal, and half is the native
+// _Float16 type in Metal mode (the same suffix is OpenCL's __fp16 half elsewhere).
+typedef _Float16 half;
+static_assert(__is_same(decltype(1.5h), half), "h suffix is a half literal");
+static_assert(__is_same(decltype(2.0H), half), "H suffix is a half literal");
+half half_literal_arithmetic() { return 1.5h * 2.0h + 0.25H; }
+static_assert(sizeof(1.0h) == 2, "half literals are 16-bit");
+#endif
