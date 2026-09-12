@@ -6208,11 +6208,15 @@ static ImplicitConversionSequence TryObjectArgumentInitialization(
 
   // First check the qualifiers.
   QualType FromTypeCanon = S.Context.getCanonicalType(FromType);
-  // Experimental Metal bootstrap mode: a default (thread) implicit object
-  // parameter accepts device, constant and threadgroup objects. Only the CVR
-  // qualifiers are compared for such objects.
+  // Metal (Metal2Vulkan fork): the implicitly-declared or defaulted special
+  // member functions (copy and move assignment) work on device, constant and
+  // threadgroup objects through their default (thread) implicit object
+  // parameter, so whole-struct assignment to a buffer element is valid MSL.
+  // User-provided member functions keep their address-space qualifier and
+  // must be called on an object in that space, as Apple's compiler requires.
+  // Only the CVR qualifiers are compared for such objects.
   const bool MetalObject =
-      S.getLangOpts().MetalBootstrap &&
+      S.getLangOpts().MetalBootstrap && !Method->isUserProvided() &&
       ImplicitParamType.getQualifiers().getAddressSpace() == LangAS::Default &&
       isMetalBootstrapObjectAddressSpace(
           S.Context, FromTypeCanon.getQualifiers().getAddressSpace());
@@ -6241,6 +6245,12 @@ static ImplicitConversionSequence TryObjectArgumentInitialization(
                  FromType, ImplicitParamType);
       return ICS;
     }
+  } else if (S.getLangOpts().Metal && ImplicitParamType.hasAddressSpace()) {
+    // Metal (Metal2Vulkan fork): a thread-space object does not bind a member
+    // function qualified for the device, constant or threadgroup space.
+    ICS.setBad(BadConversionSequence::bad_qualifiers, FromType,
+               ImplicitParamType);
+    return ICS;
   }
 
   // Check that we have either the same type or a derived type. It

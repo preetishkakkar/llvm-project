@@ -5409,7 +5409,13 @@ static TypeSourceInfo *GetFullTypeForDeclarator(TypeProcessingState &state,
                      DeclaratorContext::LambdaExpr;
         };
 
-        if (state.getSema().getLangOpts().OpenCLCPlusPlus && IsClassMember()) {
+        // Metal (Metal2Vulkan fork): a member function may carry an
+        // address-space qualifier after its parameter list (`constant`,
+        // `device`, `threadgroup`); `thread` and no qualifier leave the
+        // implicit object parameter in the default (thread) space.
+        if ((state.getSema().getLangOpts().OpenCLCPlusPlus ||
+             state.getSema().getLangOpts().Metal) &&
+            IsClassMember()) {
           LangAS ASIdx = LangAS::Default;
           // Take address space attr if any and mark as invalid to avoid adding
           // them later while creating QualType.
@@ -5427,7 +5433,8 @@ static TypeSourceInfo *GetFullTypeForDeclarator(TypeProcessingState &state,
           LangAS AS =
               (ASIdx == LangAS::Default ? S.getDefaultCXXMethodAddrSpace()
                                         : ASIdx);
-          EPI.TypeQuals.addAddressSpace(AS);
+          if (AS != LangAS::Default)
+            EPI.TypeQuals.addAddressSpace(AS);
         }
         T = Context.getFunctionType(T, ParamTys, EPI);
       }

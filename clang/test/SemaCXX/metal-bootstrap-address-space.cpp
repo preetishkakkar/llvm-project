@@ -38,7 +38,7 @@ struct Packed { // cpp-note {{copy assignment operator) not viable}}
   Packed() = default;
   Packed(const Packed &) = default;
   Packed(unsigned scalar);
-  operator unsigned() const; // cpp-note {{candidate function not viable}}
+  operator unsigned() const; // both-note {{candidate function not viable}}
 };
 
 void pointer_separation_stays(DEVICE Record *records, unsigned index) {
@@ -58,7 +58,9 @@ void object_copies(DEVICE Record *records, CONSTANT Record *constants, DEVICE Pa
   Record other = constants[index];
   records[index] = local;
   records[index] = constants[index];
-  unsigned scalar = packed[index];
+  // User-provided member functions keep their (thread) address space; only
+  // the implicit special members bind device objects.
+  unsigned scalar = packed[index]; // expected-error {{no viable conversion from 'DEVICE Packed' to 'unsigned int'}}
   packed[index] = scalar;
   unsigned component = packed[index].value;
   Record &wrong = records[index]; // expected-error {{changes address space}}

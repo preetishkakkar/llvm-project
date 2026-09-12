@@ -68,6 +68,32 @@ void pointer_separation(device float *buffer) {
   (void)local;
 }
 
+// Member functions carry address-space qualifiers; the object must live in
+// that space. Implicit copies and assignments work across spaces.
+struct Uniforms {
+  float scale;
+  float apply(float value) const { return value * scale; }
+  float apply_constant(float value) const constant { return value * scale; }
+  float apply_device(float value) device { return value * scale; }
+  void bump(float delta) { scale += delta; }
+};
+
+kernel void member_spaces(constant Uniforms &uniforms, device Uniforms *buffer, device float *out) {
+  Uniforms local = uniforms;
+  local.bump(1.0f);
+  out[0] = local.apply(2.0f);
+  out[1] = uniforms.apply_constant(2.0f);
+  out[2] = buffer[0].apply_device(2.0f);
+  buffer[1] = local;
+  buffer[2] = uniforms;
+  out[3] = uniforms.apply(2.0f); // expected-error {{cannot initialize object parameter of type 'const Uniforms' with an expression of type 'constant Uniforms'}}
+  out[4] = local.apply_constant(2.0f); // expected-error {{cannot initialize object parameter of type 'const constant Uniforms' with an expression of type 'Uniforms'}}
+  buffer[0].bump(1.0f); // expected-error {{cannot initialize object parameter of type 'Uniforms' with an expression of type 'device Uniforms'}}
+  out[5] = local.apply_device(2.0f); // expected-error {{cannot initialize object parameter of type 'device Uniforms' with an expression of type 'Uniforms'}}
+  const Uniforms frozen = local;
+  out[6] = frozen.apply_constant(2.0f); // expected-error {{cannot initialize object parameter of type 'const constant Uniforms' with an expression of type 'const Uniforms'}}
+}
+
 // Keywords cannot name variables.
 void keywords_are_reserved() {
   int device = 1;   // expected-error {{expected unqualified-id}}
