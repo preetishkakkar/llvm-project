@@ -178,3 +178,13 @@ half bfloat_to_half_implicit(bfloat b) { return b; } // expected-error {{implici
 float mixed_half_bfloat(half h, bfloat b) { return float(h) + float(b); }
 bfloat mixed_operands(half h, bfloat b) { return bfloat(h + b); } // expected-error {{implicit conversion from 'bfloat' (aka '__bf16') to 'half' (aka '_Float16') is not allowed in Metal}} expected-error {{invalid operands to binary expression}}
 #endif
+
+// Device coherence: `coherent` is a qualifier keyword in Metal mode (recorded
+// as the metal_coherent attribute) and [[coherent]] spells the same attribute;
+// in plain C++ `coherent` is an ordinary identifier.
+#ifndef PLAIN_CPP
+kernel void coherent_keyword(device coherent float *a, coherent device float *b, device float *c [[coherent]]) { a[0] = b[0] + c[0]; }
+[[coherent]] int coherent_var = 1;
+#else
+int coherent = 1;
+#endif

@@ -4072,13 +4072,16 @@ void Parser::ParseDeclarationSpecifiers(
       continue;
 
     // Metal entry-point qualifiers (Metal2Vulkan fork), recorded as the
-    // metal_kernel/metal_vertex/metal_fragment attributes.
+    // metal_kernel/metal_vertex/metal_fragment attributes; the `coherent`
+    // qualifier keyword becomes the metal_coherent declaration attribute.
     case tok::kw_kernel:
     case tok::kw_vertex:
-    case tok::kw_fragment: {
-      const char *AttrName = Tok.is(tok::kw_kernel)   ? "metal_kernel"
-                             : Tok.is(tok::kw_vertex) ? "metal_vertex"
-                                                      : "metal_fragment";
+    case tok::kw_fragment:
+    case tok::kw_coherent: {
+      const char *AttrName = Tok.is(tok::kw_kernel)     ? "metal_kernel"
+                             : Tok.is(tok::kw_vertex)   ? "metal_vertex"
+                             : Tok.is(tok::kw_fragment) ? "metal_fragment"
+                                                        : "metal_coherent";
       SourceLocation AttrLoc = ConsumeToken();
       DS.getAttributes().addNew(&PP.getIdentifierTable().get(AttrName), AttrLoc,
                                 AttributeScopeInfo(), nullptr, 0,

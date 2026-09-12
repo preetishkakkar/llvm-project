@@ -1866,6 +1866,17 @@ def MetalKernel : InheritableAttr {
   let SimpleHandler = 1;
 }
 
+// Metal device coherence (MSL `coherent` qualifier keyword or [[coherent]]):
+// recorded on the parameter or variable it qualifies; the Metal2Vulkan
+// compiler maps it to coherent memory accesses.
+def MetalCoherent : InheritableAttr {
+  let Spellings = [Clang<"metal_coherent">, CXX11<"", "coherent", 202409>];
+  let Subjects = SubjectList<[ParmVar, Var]>;
+  let LangOpts = [MetalLang];
+  let Documentation = [Undocumented];
+  let SimpleHandler = 1;
+}
+
 def MetalVertex : InheritableAttr {
   let Spellings = [Clang<"metal_vertex">];
   let Subjects = SubjectList<[Function]>;

@@ -666,6 +666,7 @@ KEYWORD(device                      , KEYMETAL)
 KEYWORD(threadgroup                 , KEYMETAL)
 KEYWORD(thread                      , KEYMETAL)
 KEYWORD(kernel                      , KEYMETAL)
+KEYWORD(coherent                    , KEYMETAL)
 KEYWORD(vertex                      , KEYMETAL)
 KEYWORD(fragment                    , KEYMETAL)
 // OpenCL access qualifiers
