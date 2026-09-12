@@ -2075,10 +2075,13 @@ static bool IsFloatingPointConversion(Sema &S, QualType FromType,
   // We of course allow this conversion if long double is really double.
 
   // Conversions between bfloat16 and float16 are currently not supported.
-  if ((FromType->isBFloat16Type() &&
-       (ToType->isFloat16Type() || ToType->isHalfType())) ||
-      (ToType->isBFloat16Type() &&
-       (FromType->isFloat16Type() || FromType->isHalfType())))
+  // Metal (Metal2Vulkan fork) converts half and bfloat explicitly; implicit
+  // conversions between them are diagnosed at the conversion sites.
+  if (!S.getLangOpts().Metal &&
+      ((FromType->isBFloat16Type() &&
+        (ToType->isFloat16Type() || ToType->isHalfType())) ||
+       (ToType->isBFloat16Type() &&
+        (FromType->isFloat16Type() || FromType->isHalfType()))))
     return false;
 
   // Conversions between IEEE-quad and IBM-extended semantics are not

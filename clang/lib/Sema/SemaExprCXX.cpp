@@ -4866,6 +4866,23 @@ Sema::PerformImplicitConversion(Expr *From, QualType ToType,
   // so that we don't need to recompute anything here.
   QualType FromType = From->getType();
 
+  // Metal (Metal2Vulkan fork): bfloat converts implicitly only to float;
+  // float and half never convert to bfloat implicitly, nor bfloat to half.
+  if (getLangOpts().Metal && !CStyle) {
+    auto Element = [](QualType T) {
+      if (const auto *V = T->getAs<VectorType>())
+        return V->getElementType().getCanonicalType();
+      return T.getCanonicalType();
+    };
+    const QualType FromElement = Element(FromType), ToElement = Element(ToType);
+    const bool ToBFloat = ToElement->isBFloat16Type() && FromElement->isFloatingType() && !FromElement->isBFloat16Type();
+    const bool ToHalf = FromElement->isBFloat16Type() && ToElement->isFloat16Type();
+    if (ToBFloat || ToHalf) {
+      Diag(From->getExprLoc(), diag::err_metal_bfloat_implicit_conversion) << FromType << ToType << From->getSourceRange();
+      return ExprError();
+    }
+  }
+
   if (SCS.CopyConstructor) {
     // FIXME: When can ToType be a reference type?
     assert(!ToType->isReferenceType());

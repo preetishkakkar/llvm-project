@@ -983,6 +983,7 @@ NumericLiteralParser::NumericLiteralParser(StringRef TokSpelling,
   isFloat = false;
   isImaginary = false;
   isFloat16 = false;
+  isBFloat16 = false;
   isFloat128 = false;
   MicrosoftInteger = 0;
   isFract = false;
@@ -1075,6 +1076,16 @@ NumericLiteralParser::NumericLiteralParser(StringRef TokSpelling,
         isFloat16 = true;
       else
         isHalf = true;
+      continue;  // Success.
+    case 'b':      // Metal: bf or BF suffix for a bfloat (brain floating-point) literal.
+    case 'B':
+      if (!LangOpts.Metal || !isFPConstant || HasSize)
+        break;
+      if (s + 1 >= ThisTokEnd || (s[1] != 'f' && s[1] != 'F'))
+        break;
+      s += 1; // eat the 'f'
+      HasSize = true;
+      isBFloat16 = true;
       continue;  // Success.
     case 'f':      // FP Suffix for "float"
     case 'F':
@@ -1254,6 +1265,7 @@ NumericLiteralParser::NumericLiteralParser(StringRef TokSpelling,
         isSizeT = false;
         isFloat = false;
         isFloat16 = false;
+        isBFloat16 = false;
         isHalf = false;
         isImaginary = false;
         isBitInt = false;

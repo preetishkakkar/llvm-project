@@ -9150,6 +9150,8 @@ def note_equality_comparison_silence : Note<
 // assignment related diagnostics (also for argument passing, returning, etc).
 // In most of these diagnostics the %2 is a value from the
 // Sema::AssignmentAction enumeration
+def err_metal_bfloat_implicit_conversion : Error<
+  "implicit conversion from %0 to %1 is not allowed in Metal; use an explicit conversion">;
 def err_typecheck_convert_incompatible : Error<
   "%select{%diff{assigning to $ from incompatible type $|"
   "assigning to type from incompatible type}0,1"

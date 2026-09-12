@@ -135,4 +135,18 @@ static_assert(__is_same(decltype(1.5h), half), "h suffix is a half literal");
 static_assert(__is_same(decltype(2.0H), half), "H suffix is a half literal");
 half half_literal_arithmetic() { return 1.5h * 2.0h + 0.25H; }
 static_assert(sizeof(1.0h) == 2, "half literals are 16-bit");
+// bfloat literals: the bf/BF suffix spells a brain floating-point literal (__bf16).
+typedef __bf16 bfloat;
+static_assert(__is_same(decltype(1.5bf), bfloat), "bf suffix is a bfloat literal");
+static_assert(__is_same(decltype(2.0BF), bfloat), "BF suffix is a bfloat literal");
+static_assert(sizeof(0.5bf) == 2, "bfloat literals are 16-bit");
+bfloat bfloat_literal_arithmetic() { return 1.5bf * 2.0bf + 0.25BF; }
+// bfloat converts implicitly only to float (MSL 2.24): every other direction is explicit.
+float bfloat_to_float(bfloat b) { return b; }
+bfloat float_to_bfloat_explicit(float f) { return bfloat(f); }
+bfloat float_to_bfloat_implicit(float f) { return f; } // expected-error {{implicit conversion from 'float' to 'bfloat' (aka '__bf16') is not allowed in Metal}}
+bfloat half_to_bfloat_implicit(half h) { return h; } // expected-error {{implicit conversion from 'half' (aka '_Float16') to 'bfloat' (aka '__bf16') is not allowed in Metal}}
+half bfloat_to_half_implicit(bfloat b) { return b; } // expected-error {{implicit conversion from 'bfloat' (aka '__bf16') to 'half' (aka '_Float16') is not allowed in Metal}}
+float mixed_half_bfloat(half h, bfloat b) { return float(h) + float(b); }
+bfloat mixed_operands(half h, bfloat b) { return bfloat(h + b); } // expected-error {{implicit conversion from 'bfloat' (aka '__bf16') to 'half' (aka '_Float16') is not allowed in Metal}} expected-error {{invalid operands to binary expression}}
 #endif

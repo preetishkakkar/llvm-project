@@ -1245,6 +1245,15 @@ static QualType handleFloatConversion(Sema &S, ExprResult &LHS,
   bool LHSFloat = LHSType->isRealFloatingType();
   bool RHSFloat = RHSType->isRealFloatingType();
 
+  // Metal (Metal2Vulkan fork): half and bfloat do not convert to each other.
+  if (S.getLangOpts().Metal &&
+      ((LHSType->isBFloat16Type() && RHSType->isFloat16Type()) ||
+       (LHSType->isFloat16Type() && RHSType->isBFloat16Type()))) {
+    S.Diag(LHS.get()->getExprLoc(), diag::err_metal_bfloat_implicit_conversion)
+        << RHSType << LHSType << LHS.get()->getSourceRange() << RHS.get()->getSourceRange();
+    return QualType();
+  }
+
   // N1169 4.1.4: If one of the operands has a floating type and the other
   //              operand has a fixed-point type, the fixed-point operand
   //              is converted to the floating type [...]
@@ -4010,6 +4019,8 @@ ExprResult Sema::ActOnNumericConstant(const Token &Tok, Scope *UDLScope) {
       Ty = !getLangOpts().HLSL ? Context.LongDoubleTy : Context.DoubleTy;
     else if (Literal.isFloat16)
       Ty = Context.Float16Ty;
+    else if (Literal.isBFloat16)
+      Ty = Context.BFloat16Ty;
     else if (Literal.isFloat128)
       Ty = Context.Float128Ty;
     else if (getLangOpts().HLSL)
