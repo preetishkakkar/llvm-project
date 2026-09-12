@@ -2772,6 +2772,15 @@ void Qualifiers::print(raw_ostream &OS, const PrintingPolicy& Policy,
     addSpace = true;
   }
   auto ASStr = getAddrSpaceAsString(getAddressSpace());
+  if (Policy.UseMetalNames) {
+    // Metal spells these address spaces with its own keywords.
+    switch (getAddressSpace()) {
+    case LangAS::opencl_global: ASStr = "device"; break;
+    case LangAS::opencl_constant: ASStr = "constant"; break;
+    case LangAS::opencl_local: ASStr = "threadgroup"; break;
+    default: break;
+    }
+  }
   if (!ASStr.empty()) {
     if (addSpace)
       OS << ' ';

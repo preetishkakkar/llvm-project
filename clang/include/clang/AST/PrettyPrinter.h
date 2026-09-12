@@ -93,7 +93,7 @@ struct PrintingPolicy {
         PrintAsCanonical(false), PrintInjectedClassNameWithArguments(true),
         UsePreferredNames(true), AlwaysIncludeTypeForTemplateArgument(false),
         CleanUglifiedParameters(false), EntireContentsOfLargeArray(true),
-        UseEnumerators(true), UseHLSLTypes(LO.HLSL),
+        UseEnumerators(true), UseHLSLTypes(LO.HLSL), UseMetalNames(LO.Metal),
         SuppressDeclAttributes(false), SuppressLambdaBody(false) {}
 
   /// Adjust this printing policy for cases where it's known that we're
@@ -366,6 +366,11 @@ struct PrintingPolicy {
   /// sugared types when possible.
   LLVM_PREFERRED_TYPE(bool)
   unsigned UseHLSLTypes : 1;
+
+  /// Whether to print Metal address-space keywords (device, constant,
+  /// threadgroup) instead of the OpenCL spellings (Metal2Vulkan fork).
+  LLVM_PREFERRED_TYPE(bool)
+  unsigned UseMetalNames : 1;
 
   /// Whether to suppress attributes in decl printing.
   LLVM_PREFERRED_TYPE(bool)

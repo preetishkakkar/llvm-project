@@ -62,7 +62,9 @@ __attribute__((metal_kernel)) void spelled_kernel() {}
 
 // Address spaces separate pointers: a device pointer is not a thread pointer.
 void pointer_separation(device float *buffer) {
-  thread float *local = buffer; // expected-error {{cannot initialize a variable of type 'float *' with an lvalue of type '__global float *'}}
+  thread float *local = buffer; // expected-error {{cannot initialize a variable of type 'float *' with an lvalue of type 'device float *'}}
+  threadgroup float *shared = buffer; // expected-error {{cannot initialize a variable of type 'threadgroup float *' with an lvalue of type 'device float *'}}
+  (void)shared;
   (void)local;
 }
 

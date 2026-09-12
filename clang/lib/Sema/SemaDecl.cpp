@@ -14130,8 +14130,10 @@ void Sema::AddInitializerToDecl(Decl *RealDecl, Expr *Init, bool DirectInit) {
     setFunctionHasBranchProtectedScope();
 
   // OpenCL 1.1 6.5.2: "Variables allocated in the __local address space inside
-  // a kernel function cannot be initialized."
-  if (VDecl->getType().getAddressSpace() == LangAS::opencl_local) {
+  // a kernel function cannot be initialized." The Metal shader frontend owns
+  // the threadgroup declaration rules and their diagnostics.
+  if (VDecl->getType().getAddressSpace() == LangAS::opencl_local &&
+      !getLangOpts().Metal) {
     Diag(VDecl->getLocation(), diag::err_local_cant_init);
     VDecl->setInvalidDecl();
     return;
