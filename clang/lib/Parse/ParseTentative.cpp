@@ -1232,6 +1232,10 @@ Parser::isCXXDeclarationSpecifier(ImplicitTypenameContext AllowImplicitTypename,
   case tok::kw___global:
   case tok::kw___constant:
   case tok::kw___generic:
+    // Metal address-space qualifiers (Metal2Vulkan fork)
+  case tok::kw_device:
+  case tok::kw_threadgroup:
+  case tok::kw_thread:
     // OpenCL access qualifiers
   case tok::kw___read_only:
   case tok::kw___write_only:

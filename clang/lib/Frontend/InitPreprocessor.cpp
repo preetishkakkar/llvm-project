@@ -397,6 +397,13 @@ static void InitializeStandardPredefinedMacros(const TargetInfo &TI,
                                                const LangOptions &LangOpts,
                                                const FrontendOptions &FEOpts,
                                                MacroBuilder &Builder) {
+  if (LangOpts.Metal) {
+    // Metal Shading Language mode (Metal2Vulkan fork).
+    Builder.defineMacro("__METAL__");
+    Builder.defineMacro("__METAL_VERSION__", Twine(LangOpts.MetalVersion));
+    Builder.defineMacro("__METAL2VULKAN__", "1");
+  }
+
   if (LangOpts.HLSL) {
     Builder.defineMacro("__hlsl_clang");
     // HLSL Version

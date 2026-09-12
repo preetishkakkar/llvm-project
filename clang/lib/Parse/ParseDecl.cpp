@@ -4071,6 +4071,21 @@ void Parser::ParseDeclarationSpecifiers(
       ParseOpenCLKernelAttributes(DS.getAttributes());
       continue;
 
+    // Metal entry-point qualifiers (Metal2Vulkan fork), recorded as the
+    // metal_kernel/metal_vertex/metal_fragment attributes.
+    case tok::kw_kernel:
+    case tok::kw_vertex:
+    case tok::kw_fragment: {
+      const char *AttrName = Tok.is(tok::kw_kernel)   ? "metal_kernel"
+                             : Tok.is(tok::kw_vertex) ? "metal_vertex"
+                                                      : "metal_fragment";
+      SourceLocation AttrLoc = ConsumeToken();
+      DS.getAttributes().addNew(&PP.getIdentifierTable().get(AttrName), AttrLoc,
+                                AttributeScopeInfo(), nullptr, 0,
+                                ParsedAttr::Form::GNU());
+      continue;
+    }
+
     // CUDA/HIP single token adornments.
     case tok::kw___noinline__:
       ParseCUDAFunctionAttributes(DS.getAttributes());
@@ -4656,6 +4671,14 @@ void Parser::ParseDeclarationSpecifiers(
     case tok::kw___write_only:
     case tok::kw___read_write:
       ParseOpenCLQualifiers(DS.getAttributes());
+      break;
+    // Metal address-space qualifiers (Metal2Vulkan fork); `thread` is the
+    // default address space and adds no qualifier.
+    case tok::kw_device:
+    case tok::kw_threadgroup:
+      ParseOpenCLQualifiers(DS.getAttributes());
+      break;
+    case tok::kw_thread:
       break;
     case tok::kw_row_major:
     case tok::kw_column_major:
@@ -5764,6 +5787,9 @@ bool Parser::isTypeSpecifierQualifier(const Token &Tok) {
   case tok::kw___global:
   case tok::kw___constant:
   case tok::kw___generic:
+  case tok::kw_device:
+  case tok::kw_threadgroup:
+  case tok::kw_thread:
   case tok::kw___read_only:
   case tok::kw___read_write:
   case tok::kw___write_only:
@@ -6050,6 +6076,9 @@ bool Parser::isDeclarationSpecifier(
   case tok::kw___global:
   case tok::kw___constant:
   case tok::kw___generic:
+  case tok::kw_device:
+  case tok::kw_threadgroup:
+  case tok::kw_thread:
   case tok::kw___read_only:
   case tok::kw___read_write:
   case tok::kw___write_only:
@@ -6302,6 +6331,13 @@ void Parser::ParseTypeQualifierListOpt(
     case tok::kw___write_only:
     case tok::kw___read_write:
       ParseOpenCLQualifiers(DS.getAttributes());
+      break;
+    // Metal address-space qualifiers (Metal2Vulkan fork).
+    case tok::kw_device:
+    case tok::kw_threadgroup:
+      ParseOpenCLQualifiers(DS.getAttributes());
+      break;
+    case tok::kw_thread:
       break;
 
     case tok::kw_groupshared:

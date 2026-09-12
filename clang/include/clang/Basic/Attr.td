@@ -450,6 +450,7 @@ def ObjCNonFragileRuntime
     : LangOpt<"", "LangOpts.ObjCRuntime.allowsClassStubs()">;
 
 def HLSL : LangOpt<"HLSL">;
+def MetalLang : LangOpt<"Metal">;
 
 // Language option for CMSE extensions
 def Cmse : LangOpt<"Cmse">;
@@ -1822,7 +1823,7 @@ def OpenCLPrivateAddressSpace : TypeAttr {
 
 def OpenCLGlobalAddressSpace : TypeAttr {
   let Spellings = [CustomKeyword<"__global">, CustomKeyword<"global">,
-                   Clang<"opencl_global">];
+                   CustomKeyword<"device">, Clang<"opencl_global">];
   let Documentation = [OpenCLAddressSpaceGlobalDocs];
 }
 
@@ -1838,7 +1839,7 @@ def OpenCLGlobalHostAddressSpace : TypeAttr {
 
 def OpenCLLocalAddressSpace : TypeAttr {
   let Spellings = [CustomKeyword<"__local">, CustomKeyword<"local">,
-                   Clang<"opencl_local">];
+                   CustomKeyword<"threadgroup">, Clang<"opencl_local">];
   let Documentation = [OpenCLAddressSpaceLocalDocs];
 }
 
@@ -1852,6 +1853,33 @@ def OpenCLGenericAddressSpace : TypeAttr {
   let Spellings = [CustomKeyword<"__generic">, CustomKeyword<"generic">,
                    Clang<"opencl_generic">];
   let Documentation = [OpenCLAddressSpaceGenericDocs];
+}
+
+// Metal Shading Language entry-point qualifiers (Metal2Vulkan fork). The
+// parser records the `kernel`, `vertex` and `fragment` keywords as these
+// attributes; the shader frontend owns the stage semantics.
+def MetalKernel : InheritableAttr {
+  let Spellings = [Clang<"metal_kernel">];
+  let Subjects = SubjectList<[Function]>;
+  let LangOpts = [MetalLang];
+  let Documentation = [Undocumented];
+  let SimpleHandler = 1;
+}
+
+def MetalVertex : InheritableAttr {
+  let Spellings = [Clang<"metal_vertex">];
+  let Subjects = SubjectList<[Function]>;
+  let LangOpts = [MetalLang];
+  let Documentation = [Undocumented];
+  let SimpleHandler = 1;
+}
+
+def MetalFragment : InheritableAttr {
+  let Spellings = [Clang<"metal_fragment">];
+  let Subjects = SubjectList<[Function]>;
+  let LangOpts = [MetalLang];
+  let Documentation = [Undocumented];
+  let SimpleHandler = 1;
 }
 
 def OpenCLNoSVM : Attr {

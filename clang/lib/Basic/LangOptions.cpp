@@ -134,6 +134,20 @@ void LangOptions::setLangDefaults(LangOptions &Opts, Language Lang,
   Opts.AllowLiteralDigitSeparator = Std.allowLiteralDigitSeparator();
   Opts.NamedLoops = Std.isC2y();
 
+  Opts.Metal = Lang == Language::Metal;
+  if (Opts.Metal) {
+    // The bootstrap relaxations (vector constructors, cross-address-space
+    // object binding, threadgroup automatic storage) are part of the mode.
+    Opts.MetalBootstrap = 1;
+    switch (LangStd) {
+    case LangStandard::lang_metal30: Opts.MetalVersion = 300; break;
+    case LangStandard::lang_metal31: Opts.MetalVersion = 310; break;
+    case LangStandard::lang_metal32: Opts.MetalVersion = 320; break;
+    case LangStandard::lang_metal40: Opts.MetalVersion = 400; break;
+    default: Opts.MetalVersion = 410; break;
+    }
+  }
+
   Opts.HLSL = Lang == Language::HLSL;
   if (Opts.HLSL) {
     if (Opts.IncludeDefaultHeader)

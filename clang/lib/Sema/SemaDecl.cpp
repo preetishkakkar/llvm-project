@@ -8956,7 +8956,8 @@ void Sema::CheckVariableDeclarationType(VarDecl *NewVD) {
   // address space 3 in its AST. Its shader lowering owns allocation and stage
   // restrictions; ordinary C++ and all other target address spaces stay rejected.
   const bool MetalThreadgroup = getLangOpts().MetalBootstrap &&
-                               T.getAddressSpace() == getLangASFromTargetAS(3);
+                               T.getAddressSpace() != LangAS::Default &&
+                               Context.getTargetAddressSpace(T.getAddressSpace()) == 3;
   if (!getLangOpts().OpenCL && !MetalThreadgroup && NewVD->hasLocalStorage() &&
       T.getAddressSpace() != LangAS::Default) {
     Diag(NewVD->getLocation(), diag::err_as_qualified_auto_decl) << 0;

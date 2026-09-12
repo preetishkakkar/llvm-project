@@ -265,6 +265,7 @@ bool types::isCXX(ID Id) {
     return false;
 
   case TY_CXX: case TY_PP_CXX:
+  case TY_Metal:
   case TY_ObjCXX: case TY_PP_ObjCXX: case TY_PP_ObjCXX_Alias:
   case TY_CXXHeader: case TY_PP_CXXHeader:
   case TY_CXXSHeader:
@@ -398,6 +399,7 @@ types::ID types::lookupTypeForExtension(llvm::StringRef Ext) {
       .Case("cppm", TY_CXXModule)
       .Case("cxxm", TY_CXXModule)
       .Case("hlsl", TY_HLSL)
+      .Case("metal", TY_Metal)
       .Default(TY_INVALID);
 }
 

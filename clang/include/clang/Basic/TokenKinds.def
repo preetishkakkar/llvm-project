@@ -289,6 +289,7 @@ PUNCTUATOR(greatergreatergreater, ">>>")
 //   KEYOPENCLCXX - This is a keyword in C++ for OpenCL
 //   KEYNOOPENCL  - This is a keyword that is not supported in OpenCL
 //   KEYNOHLSL    - This is a keyword that is not supported in HLSL
+//   KEYMETAL     - This is a keyword in the Metal Shading Language mode
 //   KEYALTIVEC - This is a keyword in AltiVec
 //   KEYZVECTOR - This is a keyword for the System z vector extensions,
 //                which are heavily based on AltiVec
@@ -649,12 +650,24 @@ KEYWORD(__private                   , KEYOPENCLC | KEYOPENCLCXX)
 KEYWORD(__generic                   , KEYOPENCLC | KEYOPENCLCXX)
 ALIAS("global", __global            , KEYOPENCLC | KEYOPENCLCXX)
 ALIAS("local", __local              , KEYOPENCLC | KEYOPENCLCXX)
-ALIAS("constant", __constant        , KEYOPENCLC | KEYOPENCLCXX)
+ALIAS("constant", __constant        , KEYOPENCLC | KEYOPENCLCXX | KEYMETAL)
 ALIAS("private", __private          , KEYOPENCLC)
 ALIAS("generic", __generic          , KEYOPENCLC | KEYOPENCLCXX)
 // OpenCL function qualifiers
 KEYWORD(__kernel                    , KEYOPENCLC | KEYOPENCLCXX)
 ALIAS("kernel", __kernel            , KEYOPENCLC | KEYOPENCLCXX)
+
+// Metal Shading Language keywords (Metal2Vulkan fork). The address-space
+// qualifiers reuse the OpenCL attribute kinds; on SPIR targets those map to
+// the numbers Metal uses (device 1, constant 2, threadgroup 3). `thread` is
+// the default address space and adds no qualifier. The entry qualifiers are
+// recorded as the metal_kernel/metal_vertex/metal_fragment attributes.
+KEYWORD(device                      , KEYMETAL)
+KEYWORD(threadgroup                 , KEYMETAL)
+KEYWORD(thread                      , KEYMETAL)
+KEYWORD(kernel                      , KEYMETAL)
+KEYWORD(vertex                      , KEYMETAL)
+KEYWORD(fragment                    , KEYMETAL)
 // OpenCL access qualifiers
 KEYWORD(__read_only                 , KEYOPENCLC | KEYOPENCLCXX)
 KEYWORD(__write_only                , KEYOPENCLC | KEYOPENCLCXX)

@@ -281,6 +281,28 @@ LANGSTANDARD(hlsl202y, "hlsl202y",
              HLSL, "High Level Shader Language 202y",
              LineComment | HLSL | CPlusPlus | CPlusPlus11, std::nullopt)
 
+// Metal Shading Language (Metal2Vulkan fork): 3.x is C++14-based, 4.x is
+// C++17-based; the frontend gates language features on the version.
+LANGSTANDARD(metal30, "metal3.0",
+             Metal, "Metal Shading Language 3.0",
+             LineComment | Metal | CPlusPlus | CPlusPlus11 | CPlusPlus14 | Digraphs | HexFloat, std::nullopt)
+
+LANGSTANDARD(metal31, "metal3.1",
+             Metal, "Metal Shading Language 3.1",
+             LineComment | Metal | CPlusPlus | CPlusPlus11 | CPlusPlus14 | Digraphs | HexFloat, std::nullopt)
+
+LANGSTANDARD(metal32, "metal3.2",
+             Metal, "Metal Shading Language 3.2",
+             LineComment | Metal | CPlusPlus | CPlusPlus11 | CPlusPlus14 | Digraphs | HexFloat, std::nullopt)
+
+LANGSTANDARD(metal40, "metal4.0",
+             Metal, "Metal Shading Language 4.0",
+             LineComment | Metal | CPlusPlus | CPlusPlus11 | CPlusPlus14 | CPlusPlus17 | Digraphs | HexFloat, std::nullopt)
+
+LANGSTANDARD(metal41, "metal4.1",
+             Metal, "Metal Shading Language 4.1",
+             LineComment | Metal | CPlusPlus | CPlusPlus11 | CPlusPlus14 | CPlusPlus17 | Digraphs | HexFloat, std::nullopt)
+
 
 #undef LANGSTANDARD
 #undef LANGSTANDARD_ALIAS
