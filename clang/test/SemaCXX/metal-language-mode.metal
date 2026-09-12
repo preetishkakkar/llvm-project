@@ -11,6 +11,7 @@
 #if defined(__METAL__) || defined(__METAL_VERSION__)
 #error Metal macros leaked into C++ mode
 #endif
+static_assert(sizeof(_Atomic(bool)) == 1, "C++ keeps byte atomics");
 int device = 1;
 int threadgroup = 2;
 int thread = 3;
@@ -128,6 +129,33 @@ constexpr int gated() {
 #endif
 
 #ifndef PLAIN_CPP
+// Threadgroup variables are never constructed: a struct or an array of structs
+// in threadgroup storage needs no constructor callable in that address space,
+// and other address spaces keep the constructor rules.
+struct Item {
+  unsigned key;
+  float weight;
+  Item() : key(0), weight(0.0f) {}
+};
+struct Plain { unsigned first; unsigned second; };
+kernel void threadgroup_records(device unsigned *out, unsigned index) {
+  threadgroup Item items[64];
+  threadgroup Item single;
+  threadgroup Plain pairs[8];
+  items[index].key = index;
+  single.weight = 1.0f;
+  pairs[index].first = items[index].key;
+  out[index] = pairs[index].first + items[index].key;
+  Item local;
+  out[index + 1] = local.key;
+}
+
+// Atomic types occupy at least a word: atomic_bool is four bytes in Metal.
+static_assert(sizeof(_Atomic(bool)) == 4 && alignof(_Atomic(bool)) == 4, "atomic_bool is a word");
+static_assert(sizeof(_Atomic(unsigned char)) == 4, "narrow atomics widen to a word");
+static_assert(sizeof(_Atomic(unsigned)) == 4 && sizeof(_Atomic(float)) == 4, "word atomics stay words");
+static_assert(sizeof(_Atomic(unsigned long)) == 8, "wide atomics keep their size");
+
 // Half literals: the h/H suffix spells a half literal, and half is the native
 // _Float16 type in Metal mode (the same suffix is OpenCL's __fp16 half elsewhere).
 typedef _Float16 half;

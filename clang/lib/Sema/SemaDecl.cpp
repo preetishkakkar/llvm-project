@@ -14798,9 +14798,15 @@ void Sema::ActOnUninitializedDecl(Decl *RealDecl) {
       }
     }
     // In OpenCL, we can't initialize objects in the __local address space,
-    // even implicitly, so don't synthesize an implicit initializer.
+    // even implicitly, so don't synthesize an implicit initializer. Metal's
+    // threadgroup variables (target address space 3) are likewise never
+    // constructed: the shader frontend owns their allocation and rules.
     if (getLangOpts().OpenCL &&
         Var->getType().getAddressSpace() == LangAS::opencl_local)
+      return;
+    if (getLangOpts().MetalBootstrap &&
+        Var->getType().getAddressSpace() != LangAS::Default &&
+        Context.getTargetAddressSpace(Var->getType().getAddressSpace()) == 3)
       return;
 
     // Handle HLSL uninitialized decls
