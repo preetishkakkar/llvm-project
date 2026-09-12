@@ -2638,13 +2638,14 @@ TypeInfo ASTContext::getTypeInfoImpl(const Type *T) const {
       // Round the size up to a power of 2.
       Width = llvm::bit_ceil(Width);
 
-      // Metal's atomic types occupy at least 32 bits (atomic_bool is four
-      // bytes, MSL 2.6), so narrow value types widen to a word.
-      if (getLangOpts().Metal && Width < 32)
-        Width = 32;
-
       // Set the alignment equal to the size.
       Align = static_cast<unsigned>(Width);
+    }
+    // Metal's atomic types occupy at least 32 bits (atomic_bool is four
+    // bytes, MSL 2.6), so narrow value types widen to a word.
+    if (getLangOpts().Metal && Width < 32) {
+      Width = 32;
+      Align = 32;
     }
   }
   break;
