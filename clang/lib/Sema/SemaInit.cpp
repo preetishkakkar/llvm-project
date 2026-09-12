@@ -5600,7 +5600,17 @@ static void TryReferenceInitializationCore(Sema &S,
   //       shall be an rvalue reference.
   //       For address spaces, we interpret this to mean that an addr space
   //       of a reference "cv1 T1" is a superset of addr space of "cv2 T2".
-  if (isLValueRef &&
+  // The experimental Metal frontend: a const lvalue reference to a class type
+  // in the default address space initialized from an unrelated type in a
+  // target address space still creates its temporary in the default address
+  // space (as with `pixel = device_scalar`), so the initializer's address
+  // space does not constrain the binding.
+  const bool MetalTemporary =
+      S.getLangOpts().MetalBootstrap && isLValueRef && T1Quals.hasConst() &&
+      !T1Quals.hasVolatile() && !T1Quals.hasAddressSpace() &&
+      T2Quals.hasAddressSpace() && T1->isRecordType() &&
+      RefRelationship == Sema::Ref_Incompatible;
+  if (isLValueRef && !MetalTemporary &&
       !(T1Quals.hasConst() && !T1Quals.hasVolatile() &&
         T1Quals.isAddressSpaceSupersetOf(T2Quals, S.getASTContext()))) {
     if (S.Context.getCanonicalType(T2) == S.Context.OverloadTy)

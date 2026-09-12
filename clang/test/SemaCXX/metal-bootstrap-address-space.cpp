@@ -33,7 +33,7 @@ void other_address_spaces_stay_rejected() {
 }
 
 struct Record { unsigned first; unsigned second; }; // cpp-note 3 {{candidate constructor}} cpp-note 2 {{assignment operator) not viable}}
-struct Packed { // cpp-note {{copy assignment operator) not viable}}
+struct Packed { // cpp-note 2 {{copy assignment operator) not viable}}
   unsigned value;
   Packed() = default;
   Packed(const Packed &) = default;
@@ -51,6 +51,7 @@ void rejected_cpp_copies(DEVICE Record *records, DEVICE Packed *packed, unsigned
   records[index] = local; // cpp-error {{no viable overloaded '='}}
   unsigned scalar = packed[index]; // cpp-error {{no viable conversion}}
   packed[index] = scalar; // cpp-error {{no viable overloaded '='}}
+  packed[index] = records[index].first; // cpp-error {{no viable overloaded '='}}
 }
 #else
 void object_copies(DEVICE Record *records, CONSTANT Record *constants, DEVICE Packed *packed, unsigned index) {
@@ -63,6 +64,10 @@ void object_copies(DEVICE Record *records, CONSTANT Record *constants, DEVICE Pa
   unsigned scalar = packed[index]; // expected-error {{no viable conversion from 'DEVICE Packed' to 'unsigned int'}}
   packed[index] = scalar;
   unsigned component = packed[index].value;
+  // A device or constant scalar initializes the temporary the implicit
+  // assignment binds, as a thread scalar does.
+  packed[index] = records[index].first;
+  packed[index] = constants[index].second;
   Record &wrong = records[index]; // expected-error {{changes address space}}
 }
 #endif
