@@ -5257,6 +5257,14 @@ static QualType withoutUnaligned(ASTContext &Ctx, QualType T) {
   return Ctx.getQualifiedType(T, Q);
 }
 
+/// Experimental Metal bootstrap mode: object address spaces that implicit
+/// copies and member calls may bind through a default (thread) reference or
+/// implicit object parameter. Pointer conversions keep their separation.
+static bool isMetalBootstrapObjectAddressSpace(LangAS AS) {
+  return isTargetAddressSpace(AS) && toTargetAddressSpace(AS) >= 1 &&
+         toTargetAddressSpace(AS) <= 3;
+}
+
 Sema::ReferenceCompareResult
 Sema::CompareReferenceRelationship(SourceLocation Loc,
                                    QualType OrigT1, QualType OrigT2,
@@ -5302,6 +5310,18 @@ Sema::CompareReferenceRelationship(SourceLocation Loc,
     return Ref_Compatible;
   }
   bool ConvertedReferent = Conv != 0;
+
+  // Experimental Metal bootstrap mode: a const reference to a class type in
+  // the default (thread) address space binds to the same class in device,
+  // constant or threadgroup memory, as implicit copy constructors and copy
+  // assignment require. The binding is a qualification conversion.
+  if (getLangOpts().MetalBootstrap && !ConvertedReferent &&
+      UnqualT1 == UnqualT2 && T1->isRecordType() && T1Quals.hasConst() &&
+      !T1Quals.hasVolatile() && T1Quals.getAddressSpace() == LangAS::Default &&
+      isMetalBootstrapObjectAddressSpace(T2Quals.getAddressSpace())) {
+    T2 = Context.removeAddrSpaceQualType(T2);
+    Conv |= ReferenceConversions::Qualification;
+  }
 
   // We can have a qualification conversion. Compute whether the types are
   // similar at the same time.
@@ -6185,11 +6205,24 @@ static ImplicitConversionSequence TryObjectArgumentInitialization(
 
   // First check the qualifiers.
   QualType FromTypeCanon = S.Context.getCanonicalType(FromType);
+  // Experimental Metal bootstrap mode: a default (thread) implicit object
+  // parameter accepts device, constant and threadgroup objects. Only the CVR
+  // qualifiers are compared for such objects.
+  const bool MetalObject =
+      S.getLangOpts().MetalBootstrap &&
+      ImplicitParamType.getQualifiers().getAddressSpace() == LangAS::Default &&
+      isMetalBootstrapObjectAddressSpace(
+          FromTypeCanon.getQualifiers().getAddressSpace());
   // MSVC ignores __unaligned qualifier for overload candidates; do the same.
   if (ImplicitParamType.getCVRQualifiers() !=
           FromTypeCanon.getLocalCVRQualifiers() &&
-      !ImplicitParamType.isAtLeastAsQualifiedAs(
-          withoutUnaligned(S.Context, FromTypeCanon), S.getASTContext())) {
+      !(MetalObject
+            ? (ImplicitParamType.getCVRQualifiers() |
+               FromTypeCanon.getLocalCVRQualifiers()) ==
+                  ImplicitParamType.getCVRQualifiers()
+            : ImplicitParamType.isAtLeastAsQualifiedAs(
+                  withoutUnaligned(S.Context, FromTypeCanon),
+                  S.getASTContext()))) {
     ICS.setBad(BadConversionSequence::bad_qualifiers,
                FromType, ImplicitParamType);
     return ICS;
@@ -6198,7 +6231,8 @@ static ImplicitConversionSequence TryObjectArgumentInitialization(
   if (FromTypeCanon.hasAddressSpace()) {
     Qualifiers QualsImplicitParamType = ImplicitParamType.getQualifiers();
     Qualifiers QualsFromType = FromTypeCanon.getQualifiers();
-    if (!QualsImplicitParamType.isAddressSpaceSupersetOf(QualsFromType,
+    if (!MetalObject &&
+        !QualsImplicitParamType.isAddressSpaceSupersetOf(QualsFromType,
                                                          S.getASTContext())) {
       ICS.setBad(BadConversionSequence::bad_qualifiers,
                  FromType, ImplicitParamType);
