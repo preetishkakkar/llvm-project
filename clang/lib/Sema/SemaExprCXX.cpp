@@ -1607,6 +1607,54 @@ Sema::BuildCXXTypeConstructExpr(TypeSourceInfo *TInfo,
         Context, Ty.getNonReferenceType(), TInfo, LParenOrBraceLoc, Exprs,
         RParenOrBraceLoc, ListInitialization);
 
+  // Metal's one-argument vector construction from a vector with the same
+  // lane count converts component-wise (C++ would bitcast same-size vectors
+  // and reject others). The operand is bound once through an opaque value
+  // and each component is converted with an explicit cast; the resulting
+  // list then initializes the vector like the multi-argument form below.
+  Expr *MetalVectorConvert = nullptr;
+  if (getLangOpts().MetalBootstrap && Ty->isExtVectorType() &&
+      !ListInitialization && Exprs.size() == 1 &&
+      !isa<InitListExpr>(Exprs[0]) && Exprs[0]->getType()->isExtVectorType()) {
+    const auto *From = Exprs[0]->getType()->castAs<ExtVectorType>();
+    const auto *To = Ty->castAs<ExtVectorType>();
+    if (From->getNumElements() == To->getNumElements() &&
+        !Context.hasSameUnqualifiedType(From->getElementType(),
+                                        To->getElementType())) {
+      ExprResult Source = DefaultLvalueConversion(Exprs[0]);
+      if (Source.isInvalid())
+        return ExprError();
+      auto *Opaque = new (Context) OpaqueValueExpr(
+          LParenOrBraceLoc, Source.get()->getType(), VK_PRValue, OK_Ordinary,
+          Source.get());
+      SmallVector<Expr *, 4> Components;
+      TypeSourceInfo *ElementInfo = Context.getTrivialTypeSourceInfo(
+          To->getElementType(), LParenOrBraceLoc);
+      for (unsigned I = 0; I < To->getNumElements(); ++I) {
+        Expr *Index = IntegerLiteral::Create(
+            Context, llvm::APInt(Context.getIntWidth(Context.IntTy), I),
+            Context.IntTy, LParenOrBraceLoc);
+        ExprResult Element = CreateBuiltinArraySubscriptExpr(
+            Opaque, LParenOrBraceLoc, Index, RParenOrBraceLoc);
+        if (Element.isInvalid())
+          return ExprError();
+        ExprResult Component = BuildCStyleCastExpr(
+            LParenOrBraceLoc, ElementInfo, RParenOrBraceLoc, Element.get());
+        if (Component.isInvalid())
+          return ExprError();
+        Components.push_back(Component.get());
+      }
+      MetalVectorConvert = new (Context) InitListExpr(
+          Context, LParenOrBraceLoc, Components, RParenOrBraceLoc,
+          /*isExplicit=*/false);
+      MetalVectorConvert->setType(Ty);
+      Exprs = MultiExprArg(&MetalVectorConvert, 1);
+      Kind = InitializationKind::CreateDirectList(TyBeginLoc, LParenOrBraceLoc,
+                                                 RParenOrBraceLoc);
+      ListInitialization = true;
+    }
+  }
+
   // Metal's multi-argument vector constructors concatenate scalar/vector
   // components. Keep this experimental extension isolated from ordinary C++.
   Expr *MetalVectorInit = nullptr;

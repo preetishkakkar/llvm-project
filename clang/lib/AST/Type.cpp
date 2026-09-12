@@ -453,7 +453,9 @@ VectorType::VectorType(TypeClass tc, QualType vecType, unsigned nElements,
 }
 
 bool Type::isPackedVectorBoolType(const ASTContext &ctx) const {
-  if (ctx.getLangOpts().HLSL)
+  // Metal (Metal2Vulkan fork): boolean vectors store one byte per component
+  // and their components are addressable by name, as in HLSL.
+  if (ctx.getLangOpts().HLSL || ctx.getLangOpts().Metal)
     return false;
   return isExtVectorBoolType();
 }

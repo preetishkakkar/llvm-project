@@ -13518,6 +13518,10 @@ QualType Sema::CheckVectorCompareOperands(ExprResult &LHS, ExprResult &RHS,
     CheckFloatComparison(Loc, LHS.get(), RHS.get(), Opc);
   }
 
+  // Metal (Metal2Vulkan fork): vector comparisons yield boolean vectors.
+  if (getLangOpts().Metal)
+    return Context.getExtVectorType(
+        Context.BoolTy, vType->castAs<VectorType>()->getNumElements());
   // Return a signed type for the vector.
   return GetSignedVectorType(vType);
 }
@@ -13690,10 +13694,11 @@ QualType Sema::CheckVectorLogicalOperands(ExprResult &LHS, ExprResult &RHS,
                                           BinaryOperatorKind Opc) {
   // Ensure that either both operands are of the same vector type, or
   // one operand is of a vector type and the other is of its element type.
+  // Metal (Metal2Vulkan fork): boolean vectors take the logical operators.
   QualType vType = CheckVectorOperands(LHS, RHS, Loc, false,
                                        /*AllowBothBool*/ true,
                                        /*AllowBoolConversions*/ false,
-                                       /*AllowBooleanOperation*/ false,
+                                       /*AllowBooleanOperation*/ getLangOpts().Metal,
                                        /*ReportInvalid*/ false);
   if (vType.isNull())
     return InvalidOperands(Loc, LHS, RHS);
@@ -13717,6 +13722,12 @@ QualType Sema::CheckVectorLogicalOperands(ExprResult &LHS, ExprResult &RHS,
     return QualType();
   }
 
+  // Metal (Metal2Vulkan fork): element-wise logical operators on vectors
+  // yield boolean vectors.
+  if (getLangOpts().Metal)
+    return Context.getExtVectorType(
+        Context.BoolTy,
+        LHS.get()->getType()->castAs<VectorType>()->getNumElements());
   return GetSignedVectorType(LHS.get()->getType());
 }
 
@@ -16398,8 +16409,13 @@ ExprResult Sema::CreateBuiltinUnaryOp(SourceLocation OpLoc,
             return ExprError(Diag(OpLoc, diag::err_typecheck_unary_expr)
                              << resultType << Input.get()->getSourceRange());
         }
-        // Vector logical not returns the signed variant of the operand type.
-        resultType = GetSignedVectorType(resultType);
+        // Vector logical not returns the signed variant of the operand type
+        // (a boolean vector in Metal, Metal2Vulkan fork).
+        resultType = getLangOpts().Metal
+                         ? Context.getExtVectorType(
+                               Context.BoolTy,
+                               resultType->castAs<VectorType>()->getNumElements())
+                         : GetSignedVectorType(resultType);
         break;
       } else if (Context.getLangOpts().CPlusPlus &&
                  resultType->isVectorType()) {
@@ -16408,8 +16424,13 @@ ExprResult Sema::CreateBuiltinUnaryOp(SourceLocation OpLoc,
           return ExprError(Diag(OpLoc, diag::err_typecheck_unary_expr)
                            << resultType << Input.get()->getSourceRange());
 
-        // Vector logical not returns the signed variant of the operand type.
-        resultType = GetSignedVectorType(resultType);
+        // Vector logical not returns the signed variant of the operand type
+        // (a boolean vector in Metal, Metal2Vulkan fork).
+        resultType = getLangOpts().Metal
+                         ? Context.getExtVectorType(
+                               Context.BoolTy,
+                               resultType->castAs<VectorType>()->getNumElements())
+                         : GetSignedVectorType(resultType);
         break;
       } else if (resultType == Context.AMDGPUFeaturePredicateTy) {
         resultType = Context.getLogicalOperationType();

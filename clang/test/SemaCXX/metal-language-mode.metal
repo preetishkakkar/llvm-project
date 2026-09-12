@@ -94,6 +94,24 @@ kernel void member_spaces(constant Uniforms &uniforms, device Uniforms *buffer, 
   out[6] = frozen.apply_constant(2.0f); // expected-error {{cannot initialize object parameter of type 'const constant Uniforms' with an expression of type 'const Uniforms'}}
 }
 
+// Vector comparisons and logical operators yield boolean vectors, and a
+// one-argument vector construction converts component-wise.
+typedef bool bool2 __attribute__((ext_vector_type(2)));
+typedef bool bool4 __attribute__((ext_vector_type(4)));
+typedef int int4 __attribute__((ext_vector_type(4)));
+kernel void vector_booleans(device float4 *out, constant float4 &a, constant float4 &b) {
+  bool4 mask = a < b;
+  bool4 inverted = !mask;
+  bool4 both = mask && inverted;
+  int4 counts = int4(a);
+  float4 back = float4(counts);
+  bool4 flags = bool4(counts);
+  out[0] = back + float4(flags);
+  bool2 pair = both.xz;
+  static_assert(sizeof(bool4) == 4, "one byte per component");
+  (void)pair;
+}
+
 // Keywords cannot name variables.
 void keywords_are_reserved() {
   int device = 1;   // expected-error {{expected unqualified-id}}
