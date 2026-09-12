@@ -416,6 +416,7 @@ LogicalResult Serializer::processDecorationAttr(Location loc, uint32_t resultID,
   case spirv::Decoration::Restrict:
   case spirv::Decoration::RestrictPointer:
   case spirv::Decoration::NoContraction:
+  case spirv::Decoration::NonUniform:
   case spirv::Decoration::Constant:
   case spirv::Decoration::Block:
   case spirv::Decoration::BufferBlock:

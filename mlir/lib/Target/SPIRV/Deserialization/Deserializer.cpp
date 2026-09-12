@@ -352,6 +352,7 @@ LogicalResult spirv::Deserializer::processDecoration(ArrayRef<uint32_t> words) {
   case spirv::Decoration::Restrict:
   case spirv::Decoration::RestrictPointer:
   case spirv::Decoration::NoContraction:
+  case spirv::Decoration::NonUniform:
   case spirv::Decoration::Constant:
   case spirv::Decoration::Invariant:
   case spirv::Decoration::Patch:
