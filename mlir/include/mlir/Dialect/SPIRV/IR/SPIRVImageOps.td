@@ -182,6 +182,47 @@ def SPIRV_ImageDrefGatherOp : SPIRV_Op<"ImageDrefGather",
 // specification's operand shapes; structural checks beyond the operand
 // constraints are left to SPIRV-Tools validation of the serialized module.
 
+def SPIRV_ImageTexelPointerOp : SPIRV_Op<"ImageTexelPointer", [Pure]> {
+  let summary = "Form a pointer to a texel of an image. Use of such a pointer is limited to atomic operations.";
+
+  let description = [{
+    Result Type must be an OpTypePointer whose Storage Class operand is
+    Image. Its Type operand must be a scalar numerical type or OpTypeVoid.
+
+    Image must have a type of OpTypePointer with Type OpTypeImage. The
+    Sampled Type of the type of the image it points to must be the same as
+    the Type pointed to by Result Type. The image type's Dim must not be
+    SubpassData and its Sampled operand must be 0 or 2.
+
+    Coordinate and Sample specify which texel and sample within the image to
+    form a pointer to; Coordinate is an integer scalar or vector containing
+    (u[, v] ... [, array layer]) as needed by the definition of Image, and
+    Sample is a 32-bit integer scalar (0 for non-multisampled images).
+
+    #### Example:
+
+    ```mlir
+    %0 = spirv.ImageTexelPointer %1, %2, %3 : !spirv.ptr<!spirv.image<i32, Dim2D, NoDepth, NonArrayed, SingleSampled, NoSampler, R32ui>, UniformConstant>, vector<2xi32>, i32 -> !spirv.ptr<i32, Image>
+    ```
+  }];
+
+  let arguments = (ins
+    SPIRV_AnyPtr:$image,
+    AnyTypeOf<[SPIRV_Integer, SPIRV_ScalarOrVectorOf<SPIRV_Integer>]>:$coordinate,
+    SPIRV_Integer:$sample
+  );
+
+  let results = (outs
+    SPIRV_AnyPtr:$result
+  );
+
+  let assemblyFormat = "$image `,` $coordinate `,` $sample attr-dict `:` type($image) `,` type($coordinate) `,` type($sample) `->` type($result)";
+
+  let hasVerifier = 0;
+}
+
+// -----
+
 def SPIRV_ImageQuerySizeLodOp : SPIRV_Op<"ImageQuerySizeLod", [Pure]> {
   let summary = "Query the dimensions of Image for mipmap level for Level of Detail.";
 
