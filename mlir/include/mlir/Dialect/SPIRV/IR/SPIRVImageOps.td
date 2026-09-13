@@ -177,6 +177,248 @@ def SPIRV_ImageDrefGatherOp : SPIRV_Op<"ImageDrefGather",
 
 // -----
 
+// Metal2Vulkan additions (m2v/msl-bootstrap): the image ops MSL texture
+// queries, gathers and depth comparisons lower to. They follow the SPIR-V
+// specification's operand shapes; structural checks beyond the operand
+// constraints are left to SPIRV-Tools validation of the serialized module.
+
+def SPIRV_ImageQuerySizeLodOp : SPIRV_Op<"ImageQuerySizeLod", [Pure]> {
+  let summary = "Query the dimensions of Image for mipmap level for Level of Detail.";
+
+  let description = [{
+    Result Type must be an integer type scalar or vector. The number of
+    components must be 1 for the 1D dimensionality, 2 for the 2D and Cube
+    dimensionalities, 3 for the 3D dimensionality, plus 1 more if the image
+    type is arrayed. This vector is filled in with (width [, height] [,
+    depth] [, elements]) where elements is the number of layers in an image
+    array, or the number of cubes in a cube-map array.
+
+    Image must be an object whose type is OpTypeImage. Its Dim operand must
+    be one of 1D, 2D, 3D, or Cube, and its MS must be 0.
+
+    Level of Detail is used to compute which mipmap level to query and must
+    be a 32-bit integer type scalar.
+
+    #### Example:
+
+    ```mlir
+    %0 = spirv.ImageQuerySizeLod %1, %2 : !spirv.image<f32, Dim2D, NoDepth, NonArrayed, SingleSampled, NeedSampler, Unknown>, i32 -> vector<2xi32>
+    ```
+  }];
+
+  let availability = [
+    MinVersion<SPIRV_V_1_0>,
+    MaxVersion<SPIRV_V_1_6>,
+    Extension<[]>,
+    Capability<[SPIRV_C_ImageQuery, SPIRV_C_Kernel]>
+  ];
+
+  let arguments = (ins
+    SPIRV_AnyImage:$image,
+    SPIRV_Integer:$lod
+  );
+
+  let results = (outs
+    SPIRV_ScalarOrVectorOf<SPIRV_Integer>:$result
+  );
+
+  let assemblyFormat = "$image `,` $lod attr-dict `:` type($image) `,` type($lod) `->` type($result)";
+
+  let hasVerifier = 0;
+}
+
+// -----
+
+def SPIRV_ImageQueryLevelsOp : SPIRV_Op<"ImageQueryLevels", [Pure]> {
+  let summary = "Query the number of mipmap levels accessible through Image.";
+
+  let description = [{
+    Result Type must be a scalar integer type. The result is the number of
+    mipmap levels, as defined by the API specification.
+
+    Image must be an object whose type is OpTypeImage. Its Dim operand must
+    be one of 1D, 2D, 3D, or Cube.
+
+    #### Example:
+
+    ```mlir
+    %0 = spirv.ImageQueryLevels %1 : !spirv.image<f32, Dim2D, NoDepth, NonArrayed, SingleSampled, NeedSampler, Unknown> -> i32
+    ```
+  }];
+
+  let availability = [
+    MinVersion<SPIRV_V_1_0>,
+    MaxVersion<SPIRV_V_1_6>,
+    Extension<[]>,
+    Capability<[SPIRV_C_ImageQuery, SPIRV_C_Kernel]>
+  ];
+
+  let arguments = (ins
+    SPIRV_AnyImage:$image
+  );
+
+  let results = (outs
+    SPIRV_Integer:$result
+  );
+
+  let assemblyFormat = "$image attr-dict `:` type($image) `->` type($result)";
+
+  let hasVerifier = 0;
+}
+
+// -----
+
+def SPIRV_ImageGatherOp : SPIRV_Op<"ImageGather",
+    [Pure,
+     SPIRV_DimIs<"sampled_image", ["Dim2D", "Cube", "Rect"], SPIRV_SampledImageTransform.result>,
+     SPIRV_MSOperandIs<"sampled_image", ["SingleSampled"], SPIRV_SampledImageTransform.result>,
+     SPIRV_NoneOrElementMatchImage<"result", "sampled_image", SPIRV_SampledImageTransform.result>]> {
+  let summary = "Gathers the requested component from four texels.";
+
+  let description = [{
+    Result Type must be a vector of four components of floating-point type
+    or integer type. Its components must be the same as Sampled Type of the
+    underlying OpTypeImage (unless that underlying Sampled Type is
+    OpTypeVoid). It has one component per gathered texel.
+
+    Sampled Image must be an object whose type is OpTypeSampledImage. Its
+    OpTypeImage must have a Dim of 2D, Cube, or Rect. The MS operand of the
+    underlying OpTypeImage must be 0.
+
+    Coordinate must be a scalar or vector of floating-point type. It
+    contains (u[, v] ... [, array layer]) as needed by the definition of
+    Sampled Image.
+
+    Component is the component number gathered from all four texels. It
+    must be a 32-bit integer type scalar. Behavior is undefined if its
+    value is not 0, 1, 2 or 3.
+
+    Image Operands encodes what operands follow, as per Image Operands.
+
+    #### Example:
+
+    ```mlir
+    %0 = spirv.ImageGather %1, %2, %3 : !spirv.sampled_image<!spirv.image<f32, Dim2D, NoDepth, NonArrayed, SingleSampled, NeedSampler, Unknown>>, vector<2xf32>, i32 -> vector<4xf32>
+    ```
+  }];
+
+  let arguments = (ins
+    SPIRV_AnySampledImage:$sampled_image,
+    SPIRV_ScalarOrVectorOf<SPIRV_Float>:$coordinate,
+    SPIRV_Integer:$component,
+    OptionalAttr<SPIRV_ImageOperandsAttr>:$image_operands,
+    Variadic<SPIRV_Type>:$operand_arguments
+  );
+
+  let results = (outs
+    AnyTypeOf<[SPIRV_Vec4<SPIRV_Integer>, SPIRV_Vec4<SPIRV_Float>]>:$result
+  );
+
+  let assemblyFormat = [{
+    $sampled_image `,` $coordinate `,` $component custom<ImageOperands>($image_operands) ( `,` $operand_arguments^ )? attr-dict
+    `:` type($sampled_image) `,` type($coordinate) `,` type($component) ( `,` type($operand_arguments)^ )?
+    `->` type($result)
+  }];
+
+  let hasVerifier = 0;
+}
+
+// -----
+
+def SPIRV_ImageSampleDrefImplicitLodOp : SPIRV_Op<"ImageSampleDrefImplicitLod",
+    [SPIRV_DimIsNot<"sampled_image", ["Buffer"], SPIRV_SampledImageTransform.result>,
+     SPIRV_MSOperandIs<"sampled_image", ["SingleSampled"], SPIRV_SampledImageTransform.result>]> {
+  let summary = "Sample an image doing depth-comparison with an implicit level of detail.";
+
+  let description = [{
+    Result Type must be a scalar of integer type or floating-point type. It
+    must be the same as Sampled Type of the underlying OpTypeImage.
+
+    Sampled Image must be an object whose type is OpTypeSampledImage. Its
+    OpTypeImage must have a Dim of 1D, 2D, 3D, or Cube, and its MS must be
+    0. Coordinate must be a scalar or vector of floating-point type. Dref is
+    the depth-comparison reference value; it must be a 32-bit floating-point
+    type scalar. Image Operands encodes what operands follow, as per Image
+    Operands. This instruction is only valid in the Fragment Execution
+    Model.
+
+    #### Example:
+
+    ```mlir
+    %0 = spirv.ImageSampleDrefImplicitLod %1, %2, %3 : !spirv.sampled_image<!spirv.image<f32, Dim2D, IsDepth, NonArrayed, SingleSampled, NeedSampler, Unknown>>, vector<2xf32>, f32 -> f32
+    ```
+  }];
+
+  let arguments = (ins
+    SPIRV_AnySampledImage:$sampled_image,
+    SPIRV_ScalarOrVectorOf<SPIRV_Float>:$coordinate,
+    SPIRV_Float:$dref,
+    OptionalAttr<SPIRV_ImageOperandsAttr>:$image_operands,
+    Variadic<SPIRV_Type>:$operand_arguments
+  );
+
+  let results = (outs
+    AnyTypeOf<[SPIRV_Integer, SPIRV_Float]>:$result
+  );
+
+  let assemblyFormat = [{
+    $sampled_image `,` $coordinate `,` $dref custom<ImageOperands>($image_operands) ( `,` $operand_arguments^ )? attr-dict
+    `:` type($sampled_image) `,` type($coordinate) `,` type($dref) ( `,` type($operand_arguments)^ )?
+    `->` type($result)
+  }];
+
+  let hasVerifier = 0;
+}
+
+// -----
+
+def SPIRV_ImageSampleDrefExplicitLodOp : SPIRV_Op<"ImageSampleDrefExplicitLod",
+    [SPIRV_DimIsNot<"sampled_image", ["Buffer"], SPIRV_SampledImageTransform.result>,
+     SPIRV_MSOperandIs<"sampled_image", ["SingleSampled"], SPIRV_SampledImageTransform.result>,
+     SPIRV_ImageOperandIsPresent<"image_operands", ["Lod", "Grad"]>]> {
+  let summary = "Sample an image doing depth-comparison using an explicit level of detail.";
+
+  let description = [{
+    Result Type must be a scalar of integer type or floating-point type. It
+    must be the same as Sampled Type of the underlying OpTypeImage.
+
+    Sampled Image must be an object whose type is OpTypeSampledImage. Its
+    OpTypeImage must have a Dim of 1D, 2D, 3D, or Cube, and its MS must be
+    0. Coordinate must be a scalar or vector of floating-point type. Dref is
+    the depth-comparison reference value; it must be a 32-bit floating-point
+    type scalar. Image Operands encodes what operands follow, as per Image
+    Operands. Either Lod or Grad image operands must be present.
+
+    #### Example:
+
+    ```mlir
+    %0 = spirv.ImageSampleDrefExplicitLod %1, %2, %3 ["Lod"](%4) : !spirv.sampled_image<!spirv.image<f32, Dim2D, IsDepth, NonArrayed, SingleSampled, NeedSampler, Unknown>>, vector<2xf32>, f32, f32 -> f32
+    ```
+  }];
+
+  let arguments = (ins
+    SPIRV_AnySampledImage:$sampled_image,
+    SPIRV_ScalarOrVectorOf<SPIRV_Float>:$coordinate,
+    SPIRV_Float:$dref,
+    SPIRV_ImageOperandsAttr:$image_operands,
+    Variadic<SPIRV_Type>:$operand_arguments
+  );
+
+  let results = (outs
+    AnyTypeOf<[SPIRV_Integer, SPIRV_Float]>:$result
+  );
+
+  let assemblyFormat = [{
+    $sampled_image `,` $coordinate `,` $dref custom<ImageOperands>($image_operands) ( `,` $operand_arguments^ )? attr-dict
+    `:` type($sampled_image) `,` type($coordinate) `,` type($dref) ( `,` type($operand_arguments)^ )?
+    `->` type($result)
+  }];
+
+  let hasVerifier = 0;
+}
+
+// -----
+
 def SPIRV_ImageQuerySizeOp : SPIRV_Op<"ImageQuerySize", [Pure]> {
   let summary = "Query the dimensions of Image, with no level of detail.";
 

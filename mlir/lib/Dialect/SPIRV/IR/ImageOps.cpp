@@ -180,9 +180,25 @@ static LogicalResult verifyImageOperands(Operation *imageOp,
     index += 2;
   }
 
+  if (spirv::bitEnumContainsAny(attr.getValue(),
+                                spirv::ImageOperands::ConstOffset)) {
+    // Metal2Vulkan addition: a constant integer texel offset.
+    if (index + 1 > operands.size())
+      return imageOp->emitError("ConstOffset operand requires 1 argument");
+    if (!isa_and_nonnull<spirv::ConstantOp>(operands[index].getDefiningOp()))
+      return imageOp->emitError("ConstOffset argument must be a constant");
+    Type offsetType = operands[index].getType();
+    if (auto offsetVector = dyn_cast<mlir::VectorType>(offsetType))
+      offsetType = offsetVector.getElementType();
+    if (!offsetType.isInteger())
+      return imageOp->emitError(
+          "ConstOffset argument must be an integer scalar or vector");
+    index += 1;
+  }
+
   // TODO: Add the validation rules for the following Image Operands.
   spirv::ImageOperands noSupportOperands =
-      spirv::ImageOperands::ConstOffset | spirv::ImageOperands::Offset |
+      spirv::ImageOperands::Offset |
       spirv::ImageOperands::ConstOffsets | spirv::ImageOperands::Sample |
       spirv::ImageOperands::MinLod | spirv::ImageOperands::MakeTexelAvailable |
       spirv::ImageOperands::MakeTexelVisible |
