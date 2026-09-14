@@ -213,11 +213,21 @@ static LogicalResult verifyImageOperands(Operation *imageOp,
     ++index;
   }
 
+  if (spirv::bitEnumContainsAny(attr.getValue(), spirv::ImageOperands::MinLod)) {
+    if (!isa<spirv::SamplingOpInterface>(imageOp) ||
+        (!isa<spirv::ImplicitLodOpInterface>(imageOp) &&
+         !spirv::bitEnumContainsAny(attr.getValue(), spirv::ImageOperands::Grad)))
+      return imageOp->emitError("MinLod requires implicit-lod sampling or Grad");
+    if (index >= operands.size() || !isCoreFloat(operands[index].getType()))
+      return imageOp->emitError("MinLod requires one floating-point scalar argument");
+    ++index;
+  }
+
   // TODO: Add the validation rules for the following Image Operands.
   spirv::ImageOperands noSupportOperands =
       spirv::ImageOperands::Offset |
       spirv::ImageOperands::ConstOffsets |
-      spirv::ImageOperands::MinLod | spirv::ImageOperands::MakeTexelAvailable |
+      spirv::ImageOperands::MakeTexelAvailable |
       spirv::ImageOperands::MakeTexelVisible |
       spirv::ImageOperands::SignExtend | spirv::ImageOperands::ZeroExtend;
 

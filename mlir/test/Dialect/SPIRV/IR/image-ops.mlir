@@ -570,3 +570,27 @@ func.func @sampled_image_sampled_operand(%arg0 : !spirv.image<f32, Dim2D, NoDept
   %0 = spirv.SampledImage %arg0, %arg1 : !spirv.image<f32, Dim2D, NoDepth, NonArrayed, SingleSampled, NoSampler, Unknown>, !spirv.sampler -> !spirv.sampled_image<!spirv.image<f32, Dim2D, NoDepth, NonArrayed, SingleSampled, NoSampler, Unknown>>
   spirv.Return
 }
+
+// -----
+
+func.func @minimum_lod(%image : !spirv.sampled_image<!spirv.image<f32, Dim2D, NoDepth, NonArrayed, SingleSampled, NeedSampler, Unknown>>, %uv : vector<2xf32>, %minimum : f32) {
+  %0 = spirv.ImageSampleImplicitLod %image, %uv ["MinLod"], %minimum : !spirv.sampled_image<!spirv.image<f32, Dim2D, NoDepth, NonArrayed, SingleSampled, NeedSampler, Unknown>>, vector<2xf32>, f32 -> vector<4xf32>
+  %1 = spirv.ImageSampleExplicitLod %image, %uv ["Grad|MinLod"], %uv, %uv, %minimum : !spirv.sampled_image<!spirv.image<f32, Dim2D, NoDepth, NonArrayed, SingleSampled, NeedSampler, Unknown>>, vector<2xf32>, vector<2xf32>, vector<2xf32>, f32 -> vector<4xf32>
+  return
+}
+
+// -----
+
+func.func @minimum_lod_type(%image : !spirv.sampled_image<!spirv.image<f32, Dim2D, NoDepth, NonArrayed, SingleSampled, NeedSampler, Unknown>>, %uv : vector<2xf32>, %minimum : i32) {
+  // expected-error @+1 {{MinLod requires one floating-point scalar argument}}
+  %0 = spirv.ImageSampleImplicitLod %image, %uv ["MinLod"], %minimum : !spirv.sampled_image<!spirv.image<f32, Dim2D, NoDepth, NonArrayed, SingleSampled, NeedSampler, Unknown>>, vector<2xf32>, i32 -> vector<4xf32>
+  return
+}
+
+// -----
+
+func.func @minimum_lod_explicit(%image : !spirv.sampled_image<!spirv.image<f32, Dim2D, NoDepth, NonArrayed, SingleSampled, NeedSampler, Unknown>>, %uv : vector<2xf32>, %minimum : f32) {
+  // expected-error @+1 {{MinLod requires implicit-lod sampling or Grad}}
+  %0 = spirv.ImageSampleExplicitLod %image, %uv ["Lod|MinLod"], %minimum, %minimum : !spirv.sampled_image<!spirv.image<f32, Dim2D, NoDepth, NonArrayed, SingleSampled, NeedSampler, Unknown>>, vector<2xf32>, f32, f32 -> vector<4xf32>
+  return
+}
