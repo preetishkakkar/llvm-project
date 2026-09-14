@@ -290,6 +290,32 @@ def SPIRV_ImageQuerySamplesOp : SPIRV_Op<"ImageQuerySamples", [Pure,
 
 // -----
 
+// Implicit derivatives depend on control flow. Do not mark this op Pure or
+// speculatable: moving it into or out of divergent control flow is unsafe.
+def SPIRV_ImageQueryLodOp : SPIRV_Op<"ImageQueryLod", [
+    SPIRV_DimIs<"sampled_image", ["Dim1D", "Dim2D", "Dim3D", "Cube"], SPIRV_SampledImageTransform.result>,
+    SPIRV_MSOperandIs<"sampled_image", ["SingleSampled"], SPIRV_SampledImageTransform.result>]> {
+  let summary = "Query the mipmap level and implicit level of detail.";
+  let description = [{
+    The two floating-point result components contain the selected mipmap level
+    and implicit LOD respectively. Coordinates contain only spatial components,
+    even for arrayed images. This operation consumes implicit derivatives and
+    is restricted to fragment execution; entry-point restrictions are checked
+    by validation of the serialized module.
+  }];
+  let availability = [
+    MinVersion<SPIRV_V_1_0>, MaxVersion<SPIRV_V_1_6>, Extension<[]>,
+    Capability<[SPIRV_C_ImageQuery]>
+  ];
+  let arguments = (ins SPIRV_AnySampledImage:$sampled_image,
+                       SPIRV_ScalarOrVectorOf<SPIRV_Float32>:$coordinate);
+  let results = (outs VectorOfRankAndLengthAndType<[1], [2], [SPIRV_Float]>:$result);
+  let assemblyFormat = "$sampled_image `,` $coordinate attr-dict `:` type($sampled_image) `,` type($coordinate) `->` type($result)";
+  let hasVerifier = 1;
+}
+
+// -----
+
 def SPIRV_ImageQueryLevelsOp : SPIRV_Op<"ImageQueryLevels", [Pure]> {
   let summary = "Query the number of mipmap levels accessible through Image.";
 

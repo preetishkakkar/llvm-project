@@ -350,6 +350,25 @@ LogicalResult spirv::ImageQuerySizeOp::verify() {
 }
 
 //===----------------------------------------------------------------------===//
+// spirv.ImageQueryLod
+//===----------------------------------------------------------------------===//
+
+LogicalResult spirv::ImageQueryLodOp::verify() {
+  auto imageType = cast<spirv::ImageType>(
+      cast<spirv::SampledImageType>(getSampledImage().getType()).getImageType());
+  unsigned required = imageType.getDim() == spirv::Dim::Dim1D ? 1 :
+                      imageType.getDim() == spirv::Dim::Dim2D ? 2 : 3;
+  unsigned actual = 1;
+  if (auto vector = dyn_cast<VectorType>(getCoordinate().getType()))
+    actual = vector.getNumElements();
+  if (actual != required)
+    return emitOpError("expected ") << required
+        << " spatial coordinate component(s), without an array layer, but found "
+        << actual;
+  return success();
+}
+
+//===----------------------------------------------------------------------===//
 // spirv.ImageSampleImplicitLod
 //===----------------------------------------------------------------------===//
 
