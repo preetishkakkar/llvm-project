@@ -270,6 +270,26 @@ def SPIRV_ImageQuerySizeLodOp : SPIRV_Op<"ImageQuerySizeLod", [Pure]> {
 
 // -----
 
+def SPIRV_ImageQuerySamplesOp : SPIRV_Op<"ImageQuerySamples", [Pure,
+    SPIRV_DimIs<"image", ["Dim2D"]>,
+    SPIRV_MSOperandIs<"image", ["MultiSampled"]>]> {
+  let summary = "Query the number of samples in a multisampled 2D image.";
+  let description = [{
+    The image must have Dim 2D and MS 1. The result is a scalar integer
+    containing the number of samples accessible through the image.
+  }];
+  let availability = [
+    MinVersion<SPIRV_V_1_0>, MaxVersion<SPIRV_V_1_6>, Extension<[]>,
+    Capability<[SPIRV_C_ImageQuery, SPIRV_C_Kernel]>
+  ];
+  let arguments = (ins SPIRV_AnyImage:$image);
+  let results = (outs SPIRV_Integer:$result);
+  let assemblyFormat = "$image attr-dict `:` type($image) `->` type($result)";
+  let hasVerifier = 0;
+}
+
+// -----
+
 def SPIRV_ImageQueryLevelsOp : SPIRV_Op<"ImageQueryLevels", [Pure]> {
   let summary = "Query the number of mipmap levels accessible through Image.";
 

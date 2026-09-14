@@ -4519,6 +4519,7 @@ def SPIRV_OC_OpImage                          : I32EnumAttrCase<"OpImage", 100>;
 def SPIRV_OC_OpImageQuerySizeLod              : I32EnumAttrCase<"OpImageQuerySizeLod", 103>;
 def SPIRV_OC_OpImageQuerySize                 : I32EnumAttrCase<"OpImageQuerySize", 104>;
 def SPIRV_OC_OpImageQueryLevels               : I32EnumAttrCase<"OpImageQueryLevels", 106>;
+def SPIRV_OC_OpImageQuerySamples              : I32EnumAttrCase<"OpImageQuerySamples", 107>;
 def SPIRV_OC_OpConvertFToU                    : I32EnumAttrCase<"OpConvertFToU", 109>;
 def SPIRV_OC_OpConvertFToS                    : I32EnumAttrCase<"OpConvertFToS", 110>;
 def SPIRV_OC_OpConvertSToF                    : I32EnumAttrCase<"OpConvertSToF", 111>;
@@ -4761,7 +4762,7 @@ def SPIRV_OpcodeAttr :
       SPIRV_OC_OpImageSampleProjDrefImplicitLod, SPIRV_OC_OpImageFetch,
       SPIRV_OC_OpImageGather, SPIRV_OC_OpImageDrefGather,
       SPIRV_OC_OpImageRead, SPIRV_OC_OpImageWrite, SPIRV_OC_OpImage,
-      SPIRV_OC_OpImageQuerySizeLod, SPIRV_OC_OpImageQuerySize, SPIRV_OC_OpImageQueryLevels,
+      SPIRV_OC_OpImageQuerySizeLod, SPIRV_OC_OpImageQuerySize, SPIRV_OC_OpImageQueryLevels, SPIRV_OC_OpImageQuerySamples,
       SPIRV_OC_OpConvertFToU, SPIRV_OC_OpConvertFToS, SPIRV_OC_OpConvertSToF,
       SPIRV_OC_OpConvertUToF, SPIRV_OC_OpUConvert, SPIRV_OC_OpSConvert,
       SPIRV_OC_OpFConvert, SPIRV_OC_OpConvertPtrToU, SPIRV_OC_OpConvertUToPtr,

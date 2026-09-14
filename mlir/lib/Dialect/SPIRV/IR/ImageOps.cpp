@@ -27,6 +27,12 @@ static bool isCoreFloat(Type type) {
 static LogicalResult verifyImageOperands(Operation *imageOp,
                                          spirv::ImageOperandsAttr attr,
                                          Operation::operand_range operands) {
+  if (isa<spirv::ImageFetchOp, spirv::ImageReadOp, spirv::ImageWriteOp>(imageOp)) {
+    auto imageType = cast<spirv::ImageType>(imageOp->getOperand(0).getType());
+    if (imageType.getSamplingInfo() == spirv::ImageSamplingInfo::MultiSampled &&
+        (!attr || !spirv::bitEnumContainsAny(attr.getValue(), spirv::ImageOperands::Sample)))
+      return imageOp->emitError("multisampled image accesses require a Sample operand");
+  }
   if (!attr) {
     if (operands.empty())
       return success();
@@ -196,10 +202,21 @@ static LogicalResult verifyImageOperands(Operation *imageOp,
     index += 1;
   }
 
+  if (spirv::bitEnumContainsAny(attr.getValue(), spirv::ImageOperands::Sample)) {
+    if (!isa<spirv::ImageFetchOp, spirv::ImageReadOp, spirv::ImageWriteOp>(imageOp))
+      return imageOp->emitError("Sample is only supported with image fetch, read or write");
+    if (index >= operands.size() || !operands[index].getType().isInteger())
+      return imageOp->emitError("Sample operand requires one scalar integer argument");
+    auto imageType = cast<spirv::ImageType>(imageOp->getOperand(0).getType());
+    if (imageType.getSamplingInfo() != spirv::ImageSamplingInfo::MultiSampled)
+      return imageOp->emitError("Sample requires an image with MS 1");
+    ++index;
+  }
+
   // TODO: Add the validation rules for the following Image Operands.
   spirv::ImageOperands noSupportOperands =
       spirv::ImageOperands::Offset |
-      spirv::ImageOperands::ConstOffsets | spirv::ImageOperands::Sample |
+      spirv::ImageOperands::ConstOffsets |
       spirv::ImageOperands::MinLod | spirv::ImageOperands::MakeTexelAvailable |
       spirv::ImageOperands::MakeTexelVisible |
       spirv::ImageOperands::SignExtend | spirv::ImageOperands::ZeroExtend;
