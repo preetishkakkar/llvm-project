@@ -4609,6 +4609,9 @@ def SPIRV_OC_OpBitFieldSExtract               : I32EnumAttrCase<"OpBitFieldSExtr
 def SPIRV_OC_OpBitFieldUExtract               : I32EnumAttrCase<"OpBitFieldUExtract", 203>;
 def SPIRV_OC_OpBitReverse                     : I32EnumAttrCase<"OpBitReverse", 204>;
 def SPIRV_OC_OpBitCount                       : I32EnumAttrCase<"OpBitCount", 205>;
+def SPIRV_OC_OpDPdx                           : I32EnumAttrCase<"OpDPdx", 207>;
+def SPIRV_OC_OpDPdy                           : I32EnumAttrCase<"OpDPdy", 208>;
+def SPIRV_OC_OpFwidth                         : I32EnumAttrCase<"OpFwidth", 209>;
 def SPIRV_OC_OpEmitVertex                     : I32EnumAttrCase<"OpEmitVertex", 218>;
 def SPIRV_OC_OpEndPrimitive                   : I32EnumAttrCase<"OpEndPrimitive", 219>;
 def SPIRV_OC_OpControlBarrier                 : I32EnumAttrCase<"OpControlBarrier", 224>;
@@ -4712,6 +4715,7 @@ def SPIRV_OC_OpConstantCompositeReplicateEXT : I32EnumAttrCase<"OpConstantCompos
 def SPIRV_OC_OpSpecConstantCompositeReplicateEXT : I32EnumAttrCase<"OpSpecConstantCompositeReplicateEXT", 4462>;
 def SPIRV_OC_OpEmitMeshTasksEXT               : I32EnumAttrCase<"OpEmitMeshTasksEXT", 5294>;
 def SPIRV_OC_OpSetMeshOutputsEXT              : I32EnumAttrCase<"OpSetMeshOutputsEXT", 5295>;
+def SPIRV_OC_OpDemoteToHelperInvocation       : I32EnumAttrCase<"OpDemoteToHelperInvocation", 5380>;
 def SPIRV_OC_OpSubgroupBlockReadINTEL         : I32EnumAttrCase<"OpSubgroupBlockReadINTEL", 5575>;
 def SPIRV_OC_OpSubgroupBlockWriteINTEL        : I32EnumAttrCase<"OpSubgroupBlockWriteINTEL", 5576>;
 def SPIRV_OC_OpAssumeTrueKHR                  : I32EnumAttrCase<"OpAssumeTrueKHR", 5630>;
@@ -4796,6 +4800,7 @@ def SPIRV_OpcodeAttr :
       SPIRV_OC_OpBitwiseOr, SPIRV_OC_OpBitwiseXor, SPIRV_OC_OpBitwiseAnd,
       SPIRV_OC_OpNot, SPIRV_OC_OpBitFieldInsert, SPIRV_OC_OpBitFieldSExtract,
       SPIRV_OC_OpBitFieldUExtract, SPIRV_OC_OpBitReverse, SPIRV_OC_OpBitCount,
+      SPIRV_OC_OpDPdx, SPIRV_OC_OpDPdy, SPIRV_OC_OpFwidth,
       SPIRV_OC_OpEmitVertex, SPIRV_OC_OpEndPrimitive, SPIRV_OC_OpControlBarrier,
       SPIRV_OC_OpMemoryBarrier, SPIRV_OC_OpAtomicLoad, SPIRV_OC_OpAtomicStore,
       SPIRV_OC_OpAtomicExchange,
@@ -4843,7 +4848,7 @@ def SPIRV_OpcodeAttr :
       SPIRV_OC_OpCooperativeMatrixMulAddKHR, SPIRV_OC_OpCooperativeMatrixLengthKHR,
       SPIRV_OC_OpConstantCompositeReplicateEXT,
       SPIRV_OC_OpSpecConstantCompositeReplicateEXT,
-      SPIRV_OC_OpEmitMeshTasksEXT, SPIRV_OC_OpSetMeshOutputsEXT,
+      SPIRV_OC_OpEmitMeshTasksEXT, SPIRV_OC_OpSetMeshOutputsEXT, SPIRV_OC_OpDemoteToHelperInvocation,
       SPIRV_OC_OpSubgroupBlockReadINTEL, SPIRV_OC_OpSubgroupBlockWriteINTEL,
       SPIRV_OC_OpAssumeTrueKHR, SPIRV_OC_OpExpectKHR, SPIRV_OC_OpAtomicFAddEXT,
       SPIRV_OC_OpTypeStructContinuedINTEL,

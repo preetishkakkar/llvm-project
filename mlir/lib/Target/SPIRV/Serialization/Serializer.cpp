@@ -407,6 +407,8 @@ LogicalResult Serializer::processDecorationAttr(Location loc, uint32_t resultID,
   case spirv::Decoration::Aliased:
   case spirv::Decoration::AliasedPointer:
   case spirv::Decoration::Flat:
+  case spirv::Decoration::Centroid:
+  case spirv::Decoration::Sample:
   case spirv::Decoration::NonReadable:
   case spirv::Decoration::NonWritable:
   case spirv::Decoration::NoPerspective:
