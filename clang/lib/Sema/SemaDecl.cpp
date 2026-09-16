@@ -14575,8 +14575,12 @@ void Sema::ActOnUninitializedDecl(Decl *RealDecl) {
     }
 
     // OpenCL v1.1 s6.5.3: variables declared in the constant address space must
-    // be initialized.
-    if (!Var->isInvalidDecl() &&
+    // be initialized. MSL 5.8 says the opposite for function constants
+    // ("You don't initialize function constants in the Metal function source"),
+    // which are program-scope constant variables, so Metal mode leaves the rule
+    // to the Metal compiler, which requires an initializer of every program-scope
+    // constant that is not a function constant.
+    if (!Var->isInvalidDecl() && !getLangOpts().Metal &&
         Var->getType().getAddressSpace() == LangAS::opencl_constant &&
         Var->getStorageClass() != SC_Extern && !Var->getInit()) {
       bool HasConstExprDefaultConstructor = false;
