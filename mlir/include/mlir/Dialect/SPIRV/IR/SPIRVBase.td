@@ -4715,6 +4715,8 @@ def SPIRV_OC_OpConstantCompositeReplicateEXT : I32EnumAttrCase<"OpConstantCompos
 def SPIRV_OC_OpSpecConstantCompositeReplicateEXT : I32EnumAttrCase<"OpSpecConstantCompositeReplicateEXT", 4462>;
 def SPIRV_OC_OpEmitMeshTasksEXT               : I32EnumAttrCase<"OpEmitMeshTasksEXT", 5294>;
 def SPIRV_OC_OpSetMeshOutputsEXT              : I32EnumAttrCase<"OpSetMeshOutputsEXT", 5295>;
+def SPIRV_OC_OpBeginInvocationInterlockEXT    : I32EnumAttrCase<"OpBeginInvocationInterlockEXT", 5364>;
+def SPIRV_OC_OpEndInvocationInterlockEXT      : I32EnumAttrCase<"OpEndInvocationInterlockEXT", 5365>;
 def SPIRV_OC_OpDemoteToHelperInvocation       : I32EnumAttrCase<"OpDemoteToHelperInvocation", 5380>;
 def SPIRV_OC_OpSubgroupBlockReadINTEL         : I32EnumAttrCase<"OpSubgroupBlockReadINTEL", 5575>;
 def SPIRV_OC_OpSubgroupBlockWriteINTEL        : I32EnumAttrCase<"OpSubgroupBlockWriteINTEL", 5576>;
@@ -4848,7 +4850,9 @@ def SPIRV_OpcodeAttr :
       SPIRV_OC_OpCooperativeMatrixMulAddKHR, SPIRV_OC_OpCooperativeMatrixLengthKHR,
       SPIRV_OC_OpConstantCompositeReplicateEXT,
       SPIRV_OC_OpSpecConstantCompositeReplicateEXT,
-      SPIRV_OC_OpEmitMeshTasksEXT, SPIRV_OC_OpSetMeshOutputsEXT, SPIRV_OC_OpDemoteToHelperInvocation,
+      SPIRV_OC_OpEmitMeshTasksEXT, SPIRV_OC_OpSetMeshOutputsEXT,
+      SPIRV_OC_OpBeginInvocationInterlockEXT, SPIRV_OC_OpEndInvocationInterlockEXT,
+      SPIRV_OC_OpDemoteToHelperInvocation,
       SPIRV_OC_OpSubgroupBlockReadINTEL, SPIRV_OC_OpSubgroupBlockWriteINTEL,
       SPIRV_OC_OpAssumeTrueKHR, SPIRV_OC_OpExpectKHR, SPIRV_OC_OpAtomicFAddEXT,
       SPIRV_OC_OpTypeStructContinuedINTEL,
