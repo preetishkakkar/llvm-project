@@ -18,10 +18,6 @@
 
 include "mlir/Dialect/SPIRV/IR/SPIRVBase.td"
 
-def SPIRV_AccelerationStructure : DialectType<SPIRV_Dialect,
-    CPred<"::llvm::isa<::mlir::spirv::AccelerationStructureKHRType>($_self)">,
-    "acceleration structure type">;
-
 class SPIRV_RayQueryOp<string mnemonic, list<Trait> traits = []> :
     SPIRV_KhrVendorOp<"RayQuery" # mnemonic, traits> {
   let availability = [
@@ -51,7 +47,7 @@ def SPIRV_KHRRayQueryInitializeOp : SPIRV_RayQueryOp<"Initialize"> {
   }];
   let arguments = (ins
     SPIRV_AnyPtr:$ray_query,
-    SPIRV_AccelerationStructure:$accel,
+    SPIRV_AnyAccelerationStructure:$accel,
     SPIRV_Int32:$ray_flags,
     SPIRV_Int32:$cull_mask,
     VectorOfLengthAndType<[3], [SPIRV_Float32]>:$ray_origin,

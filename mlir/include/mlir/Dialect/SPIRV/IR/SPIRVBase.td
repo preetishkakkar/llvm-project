@@ -4294,6 +4294,8 @@ def SPIRV_IsPtrType : CPred<"::llvm::isa<::mlir::spirv::PointerType>($_self)">;
 def SPIRV_IsRTArrayType : CPred<"::llvm::isa<::mlir::spirv::RuntimeArrayType>($_self)">;
 def SPIRV_IsSampledImageType : CPred<"::llvm::isa<::mlir::spirv::SampledImageType>($_self)">;
 def SPIRV_IsSamplerType : CPred<"::llvm::isa<::mlir::spirv::SamplerType>($_self)">;
+def SPIRV_IsRayQueryType : CPred<"::llvm::isa<::mlir::spirv::RayQueryKHRType>($_self)">;
+def SPIRV_IsAccelerationStructureType : CPred<"::llvm::isa<::mlir::spirv::AccelerationStructureKHRType>($_self)">;
 def SPIRV_IsNamedBarrierType : CPred<"::llvm::isa<::mlir::spirv::NamedBarrierType>($_self)">;
 def SPIRV_IsStructType : CPred<"::llvm::isa<::mlir::spirv::StructType>($_self)">;
 def SPIRV_IsTensorArmType : CPred<"::llvm::isa<::mlir::spirv::TensorArmType>($_self)">;
@@ -4354,6 +4356,11 @@ def SPIRV_AnyNamedBarrier : DialectType<SPIRV_Dialect, SPIRV_IsNamedBarrierType,
                                 "any SPIR-V named barrier type">;
 def SPIRV_AnyTensorArm : DialectType<SPIRV_Dialect, SPIRV_IsTensorArmType,
                                  "any SPIR-V tensorArm type">;
+def SPIRV_AnyRayQuery : DialectType<SPIRV_Dialect, SPIRV_IsRayQueryType,
+                                "any SPIR-V ray query type">;
+def SPIRV_AnyAccelerationStructure : DialectType<SPIRV_Dialect,
+                                SPIRV_IsAccelerationStructureType,
+                                "any SPIR-V acceleration structure type">;
 
 def SPIRV_Numerical : AnyTypeOf<[SPIRV_Integer, SPIRV_Float]>;
 def SPIRV_ExtendedNumerical : AnyTypeOf<[SPIRV_Integer, SPIRV_Float, SPIRV_BFloat16KHR, SPIRV_Float8E4M3EXT, SPIRV_Float8E5M2EXT]>;
@@ -4369,7 +4376,7 @@ def SPIRV_Type : AnyTypeOf<[
     SPIRV_AnyPtr, SPIRV_AnyArray, SPIRV_AnyRTArray, SPIRV_AnyStruct,
     SPIRV_AnyCooperativeMatrix, SPIRV_AnyMatrix, SPIRV_AnySampledImage,
     SPIRV_AnySampler, SPIRV_AnyImage, SPIRV_AnyTensorArm,
-    SPIRV_AnyFloatVector
+    SPIRV_AnyFloatVector, SPIRV_AnyRayQuery, SPIRV_AnyAccelerationStructure
   ]>;
 
 def SPIRV_SignedInt : SignedIntOfWidths<[8, 16, 32, 64]>;

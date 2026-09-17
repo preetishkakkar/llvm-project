@@ -496,6 +496,7 @@ static mlir::GenRegistration
 // directly use the constant value as attribute in SPIR-V dialect. So need
 // to handle them separately from normal enum attributes.
 constexpr llvm::StringLiteral constantIdEnumAttrs[] = {
+    "SPIRV_RayQueryIntersectionAttr",
     "SPIRV_ScopeAttr",
     "SPIRV_KHR_CooperativeMatrixUseAttr",
     "SPIRV_KHR_CooperativeMatrixLayoutAttr",
