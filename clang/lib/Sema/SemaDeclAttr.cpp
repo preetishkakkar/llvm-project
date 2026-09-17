@@ -2061,6 +2061,24 @@ static void handleCPUSpecificAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
                    CPUDispatchAttr(S.Context, AL, CPUs.data(), CPUs.size()));
 }
 
+// Metal2Vulkan fork: [[intersection(kind, tags...)]] keeps its identifiers for
+// the shader frontend, which checks the kind and the tags itself.
+static void handleMetalIntersectionAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
+  if (!AL.checkAtLeastNumArgs(S, 1))
+    return;
+  SmallVector<const IdentifierInfo *, 4> Tags;
+  for (unsigned ArgNo = 0; ArgNo < getNumAttributeArgs(AL); ++ArgNo) {
+    if (!AL.isArgIdent(ArgNo)) {
+      S.Diag(AL.getLoc(), diag::err_attribute_argument_type)
+          << AL << AANT_ArgumentIdentifier;
+      return;
+    }
+    Tags.push_back(AL.getArgAsIdent(ArgNo)->getIdentifierInfo());
+  }
+  D->addAttr(::new (S.Context)
+                 MetalIntersectionAttr(S.Context, AL, Tags.data(), Tags.size()));
+}
+
 static void handleCommonAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
   if (S.LangOpts.CPlusPlus) {
     S.Diag(AL.getLoc(), diag::err_attribute_not_supported_in_lang)
@@ -7783,6 +7801,9 @@ ProcessDeclAttribute(Sema &S, Scope *scope, Decl *D, const ParsedAttr &AL,
   case ParsedAttr::AT_CPUDispatch:
   case ParsedAttr::AT_CPUSpecific:
     handleCPUSpecificAttr(S, D, AL);
+    break;
+  case ParsedAttr::AT_MetalIntersection:
+    handleMetalIntersectionAttr(S, D, AL);
     break;
   case ParsedAttr::AT_Common:
     handleCommonAttr(S, D, AL);

@@ -1898,6 +1898,19 @@ def MetalFragment : InheritableAttr {
   let SimpleHandler = 1;
 }
 
+// MSL intersection functions (section 6.18.8): [[intersection(kind, tags...)]]
+// names the kind of candidate the function decides (triangle, bounding_box, ...)
+// and the intersection tags it traverses with, all identifiers. A plugin
+// attribute can take an identifier only as its first argument, so the fork
+// records the list; the shader frontend owns the semantics.
+def MetalIntersection : InheritableAttr {
+  let Spellings = [CXX11<"", "intersection", 202409>];
+  let Args = [VariadicIdentifierArgument<"Tags">];
+  let Subjects = SubjectList<[Function]>;
+  let LangOpts = [MetalLang];
+  let Documentation = [Undocumented];
+}
+
 def OpenCLNoSVM : Attr {
   let Spellings = [GNU<"nosvm">];
   let Subjects = SubjectList<[Var]>;
