@@ -667,6 +667,12 @@ KEYWORD(threadgroup                 , KEYMETAL)
 KEYWORD(thread                      , KEYMETAL)
 KEYWORD(kernel                      , KEYMETAL)
 KEYWORD(coherent                    , KEYMETAL)
+// MSL's object_data address space (section 5.4): the payload an object (task)
+// entry writes and the mesh entries it launches read. SPIR-V puts it in
+// TaskPayloadWorkgroupEXT, which is threadgroup-shared storage of the launching
+// workgroup, so it parses as the threadgroup qualifier; the shader frontend
+// requires it on a [[payload]] parameter and gives it the payload's meaning.
+ALIAS("object_data", threadgroup    , KEYMETAL)
 KEYWORD(vertex                      , KEYMETAL)
 KEYWORD(fragment                    , KEYMETAL)
 // OpenCL access qualifiers

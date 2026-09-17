@@ -1838,8 +1838,13 @@ def OpenCLGlobalHostAddressSpace : TypeAttr {
 }
 
 def OpenCLLocalAddressSpace : TypeAttr {
+  // `object_data` is MSL's payload address space (section 5.4), which SPIR-V
+  // puts in TaskPayloadWorkgroupEXT: threadgroup-shared storage of the
+  // launching workgroup, so it shares this attribute kind and is told apart by
+  // its spelling.
   let Spellings = [CustomKeyword<"__local">, CustomKeyword<"local">,
-                   CustomKeyword<"threadgroup">, Clang<"opencl_local">];
+                   CustomKeyword<"threadgroup">, CustomKeyword<"object_data">,
+                   Clang<"opencl_local">];
   let Documentation = [OpenCLAddressSpaceLocalDocs];
 }
 
