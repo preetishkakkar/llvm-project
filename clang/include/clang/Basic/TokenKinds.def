@@ -673,6 +673,12 @@ KEYWORD(coherent                    , KEYMETAL)
 // workgroup, so it parses as the threadgroup qualifier; the shader frontend
 // requires it on a [[payload]] parameter and gives it the payload's meaning.
 ALIAS("object_data", threadgroup    , KEYMETAL)
+// MSL's ray_data address space (section 6.18.8): the payload an intersection
+// function reads and writes for the entry that called intersect(). The shader
+// frontend inlines intersection functions into that entry, where the payload
+// is one of its own thread-space locals, so ray_data parses as the thread
+// qualifier and the frontend requires it on a [[payload]] parameter.
+ALIAS("ray_data", thread            , KEYMETAL)
 KEYWORD(vertex                      , KEYMETAL)
 KEYWORD(fragment                    , KEYMETAL)
 // OpenCL access qualifiers
