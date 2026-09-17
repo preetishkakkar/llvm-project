@@ -251,6 +251,31 @@ public:
   static NamedBarrierType get(MLIRContext *context);
 };
 
+// SPIR-V ray query type (OpTypeRayQueryKHR): the opaque traversal state of one
+// ray query, held in a Function or Private variable.
+class RayQueryKHRType
+    : public Type::TypeBase<RayQueryKHRType, SPIRVType, TypeStorage> {
+public:
+  using Base::Base;
+
+  static constexpr StringLiteral name = "spirv.ray_query";
+
+  static RayQueryKHRType get(MLIRContext *context);
+};
+
+// SPIR-V acceleration structure type (OpTypeAccelerationStructureKHR): the
+// opaque handle a ray query traverses, bound as a descriptor.
+class AccelerationStructureKHRType
+    : public Type::TypeBase<AccelerationStructureKHRType, SPIRVType,
+                            TypeStorage> {
+public:
+  using Base::Base;
+
+  static constexpr StringLiteral name = "spirv.acceleration_structure";
+
+  static AccelerationStructureKHRType get(MLIRContext *context);
+};
+
 /// SPIR-V struct type. Two kinds of struct types are supported:
 /// - Literal: a literal struct type is uniqued by its fields (types + offset
 /// info + decoration info).

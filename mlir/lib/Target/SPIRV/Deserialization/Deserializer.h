@@ -326,6 +326,11 @@ private:
 
   LogicalResult processNamedBarrierType(ArrayRef<uint32_t> operands);
 
+  LogicalResult processRayQueryType(ArrayRef<uint32_t> operands);
+
+  LogicalResult
+  processAccelerationStructureType(ArrayRef<uint32_t> operands);
+
   LogicalResult processRuntimeArrayType(ArrayRef<uint32_t> operands);
 
   LogicalResult processStructType(ArrayRef<uint32_t> operands);

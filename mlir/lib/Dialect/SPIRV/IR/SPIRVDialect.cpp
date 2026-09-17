@@ -870,6 +870,10 @@ Type SPIRVDialect::parseType(DialectAsmParser &parser) const {
     return SamplerType::get(getContext());
   if (keyword == "named_barrier")
     return NamedBarrierType::get(getContext());
+  if (keyword == "ray_query")
+    return RayQueryKHRType::get(getContext());
+  if (keyword == "acceleration_structure")
+    return AccelerationStructureKHRType::get(getContext());
   if (keyword == "struct")
     return parseStructType(*this, parser);
   if (keyword == "matrix")
@@ -920,6 +924,14 @@ static void print(SamplerType type, DialectAsmPrinter &os) { os << "sampler"; }
 
 static void print(NamedBarrierType type, DialectAsmPrinter &os) {
   os << "named_barrier";
+}
+
+static void print(RayQueryKHRType type, DialectAsmPrinter &os) {
+  os << "ray_query";
+}
+
+static void print(AccelerationStructureKHRType type, DialectAsmPrinter &os) {
+  os << "acceleration_structure";
 }
 
 static void print(StructType type, DialectAsmPrinter &os) {
@@ -1017,8 +1029,8 @@ void SPIRVDialect::printType(Type type, DialectAsmPrinter &os) const {
   TypeSwitch<Type>(type)
       .Case<ArrayType, CooperativeMatrixType, PointerType, RuntimeArrayType,
             ImageType, SampledImageType, SamplerType, NamedBarrierType,
-            StructType, MatrixType, TensorArmType>(
-          [&](auto type) { print(type, os); })
+            RayQueryKHRType, AccelerationStructureKHRType, StructType,
+            MatrixType, TensorArmType>([&](auto type) { print(type, os); })
       .DefaultUnreachable("Unhandled SPIR-V type");
 }
 

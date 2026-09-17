@@ -1219,6 +1219,10 @@ LogicalResult spirv::Deserializer::processType(spirv::Opcode opcode,
     return processSamplerType(operands);
   case spirv::Opcode::OpTypeNamedBarrier:
     return processNamedBarrierType(operands);
+  case spirv::Opcode::OpTypeRayQueryKHR:
+    return processRayQueryType(operands);
+  case spirv::Opcode::OpTypeAccelerationStructureKHR:
+    return processAccelerationStructureType(operands);
   case spirv::Opcode::OpTypeSampledImage:
     return processSampledImageType(operands);
   case spirv::Opcode::OpTypeRuntimeArray:
@@ -1718,6 +1722,25 @@ spirv::Deserializer::processNamedBarrierType(ArrayRef<uint32_t> operands) {
     return emitError(unknownLoc, "OpTypeNamedBarrier must have no parameters");
 
   typeMap[operands[0]] = spirv::NamedBarrierType::get(context);
+  return success();
+}
+
+LogicalResult
+spirv::Deserializer::processRayQueryType(ArrayRef<uint32_t> operands) {
+  if (operands.size() != 1)
+    return emitError(unknownLoc, "OpTypeRayQueryKHR must have no parameters");
+
+  typeMap[operands[0]] = spirv::RayQueryKHRType::get(context);
+  return success();
+}
+
+LogicalResult spirv::Deserializer::processAccelerationStructureType(
+    ArrayRef<uint32_t> operands) {
+  if (operands.size() != 1)
+    return emitError(unknownLoc,
+                     "OpTypeAccelerationStructureKHR must have no parameters");
+
+  typeMap[operands[0]] = spirv::AccelerationStructureKHRType::get(context);
   return success();
 }
 

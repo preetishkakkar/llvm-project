@@ -812,6 +812,16 @@ LogicalResult Serializer::prepareBasicType(
     return success();
   }
 
+  if (isa<spirv::RayQueryKHRType>(type)) {
+    typeEnum = spirv::Opcode::OpTypeRayQueryKHR;
+    return success();
+  }
+
+  if (isa<spirv::AccelerationStructureKHRType>(type)) {
+    typeEnum = spirv::Opcode::OpTypeAccelerationStructureKHR;
+    return success();
+  }
+
   if (auto sampledImageType = dyn_cast<spirv::SampledImageType>(type)) {
     typeEnum = spirv::Opcode::OpTypeSampledImage;
     uint32_t imageTypeID = 0;

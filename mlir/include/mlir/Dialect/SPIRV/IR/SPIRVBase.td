@@ -3415,6 +3415,14 @@ def SPIRV_GroupOperationAttr :
       SPIRV_GO_PartitionedInclusiveScanNV, SPIRV_GO_PartitionedExclusiveScanNV
     ]>;
 
+def SPIRV_RQI_Candidate : I32EnumAttrCase<"RayQueryCandidateIntersectionKHR", 0>;
+def SPIRV_RQI_Committed : I32EnumAttrCase<"RayQueryCommittedIntersectionKHR", 1>;
+
+def SPIRV_RayQueryIntersectionAttr :
+    SPIRV_I32EnumAttr<"RayQueryIntersection", "valid SPIR-V RayQueryIntersection", "ray_query_intersection", [
+      SPIRV_RQI_Candidate, SPIRV_RQI_Committed
+    ]>;
+
 def SPIRV_IF_Unknown      : I32EnumAttrCase<"Unknown", 0>;
 def SPIRV_IF_Rgba32f      : I32EnumAttrCase<"Rgba32f", 1> {
   list<Availability> availability = [
@@ -4715,6 +4723,31 @@ def SPIRV_OC_OpConstantCompositeReplicateEXT : I32EnumAttrCase<"OpConstantCompos
 def SPIRV_OC_OpSpecConstantCompositeReplicateEXT : I32EnumAttrCase<"OpSpecConstantCompositeReplicateEXT", 4462>;
 def SPIRV_OC_OpEmitMeshTasksEXT               : I32EnumAttrCase<"OpEmitMeshTasksEXT", 5294>;
 def SPIRV_OC_OpSetMeshOutputsEXT              : I32EnumAttrCase<"OpSetMeshOutputsEXT", 5295>;
+def SPIRV_OC_OpTypeRayQueryKHR                               : I32EnumAttrCase<"OpTypeRayQueryKHR", 4472>;
+def SPIRV_OC_OpRayQueryInitializeKHR                         : I32EnumAttrCase<"OpRayQueryInitializeKHR", 4473>;
+def SPIRV_OC_OpRayQueryTerminateKHR                          : I32EnumAttrCase<"OpRayQueryTerminateKHR", 4474>;
+def SPIRV_OC_OpRayQueryGenerateIntersectionKHR               : I32EnumAttrCase<"OpRayQueryGenerateIntersectionKHR", 4475>;
+def SPIRV_OC_OpRayQueryConfirmIntersectionKHR                : I32EnumAttrCase<"OpRayQueryConfirmIntersectionKHR", 4476>;
+def SPIRV_OC_OpRayQueryProceedKHR                            : I32EnumAttrCase<"OpRayQueryProceedKHR", 4477>;
+def SPIRV_OC_OpRayQueryGetIntersectionTypeKHR                : I32EnumAttrCase<"OpRayQueryGetIntersectionTypeKHR", 4479>;
+def SPIRV_OC_OpTypeAccelerationStructureKHR                  : I32EnumAttrCase<"OpTypeAccelerationStructureKHR", 5341>;
+def SPIRV_OC_OpRayQueryGetRayTMinKHR                         : I32EnumAttrCase<"OpRayQueryGetRayTMinKHR", 6016>;
+def SPIRV_OC_OpRayQueryGetRayFlagsKHR                        : I32EnumAttrCase<"OpRayQueryGetRayFlagsKHR", 6017>;
+def SPIRV_OC_OpRayQueryGetIntersectionTKHR                   : I32EnumAttrCase<"OpRayQueryGetIntersectionTKHR", 6018>;
+def SPIRV_OC_OpRayQueryGetIntersectionInstanceCustomIndexKHR : I32EnumAttrCase<"OpRayQueryGetIntersectionInstanceCustomIndexKHR", 6019>;
+def SPIRV_OC_OpRayQueryGetIntersectionInstanceIdKHR          : I32EnumAttrCase<"OpRayQueryGetIntersectionInstanceIdKHR", 6020>;
+def SPIRV_OC_OpRayQueryGetIntersectionInstanceShaderBindingTableRecordOffsetKHR: I32EnumAttrCase<"OpRayQueryGetIntersectionInstanceShaderBindingTableRecordOffsetKHR", 6021>;
+def SPIRV_OC_OpRayQueryGetIntersectionGeometryIndexKHR       : I32EnumAttrCase<"OpRayQueryGetIntersectionGeometryIndexKHR", 6022>;
+def SPIRV_OC_OpRayQueryGetIntersectionPrimitiveIndexKHR      : I32EnumAttrCase<"OpRayQueryGetIntersectionPrimitiveIndexKHR", 6023>;
+def SPIRV_OC_OpRayQueryGetIntersectionBarycentricsKHR        : I32EnumAttrCase<"OpRayQueryGetIntersectionBarycentricsKHR", 6024>;
+def SPIRV_OC_OpRayQueryGetIntersectionFrontFaceKHR           : I32EnumAttrCase<"OpRayQueryGetIntersectionFrontFaceKHR", 6025>;
+def SPIRV_OC_OpRayQueryGetIntersectionCandidateAABBOpaqueKHR : I32EnumAttrCase<"OpRayQueryGetIntersectionCandidateAABBOpaqueKHR", 6026>;
+def SPIRV_OC_OpRayQueryGetIntersectionObjectRayDirectionKHR  : I32EnumAttrCase<"OpRayQueryGetIntersectionObjectRayDirectionKHR", 6027>;
+def SPIRV_OC_OpRayQueryGetIntersectionObjectRayOriginKHR     : I32EnumAttrCase<"OpRayQueryGetIntersectionObjectRayOriginKHR", 6028>;
+def SPIRV_OC_OpRayQueryGetWorldRayDirectionKHR               : I32EnumAttrCase<"OpRayQueryGetWorldRayDirectionKHR", 6029>;
+def SPIRV_OC_OpRayQueryGetWorldRayOriginKHR                  : I32EnumAttrCase<"OpRayQueryGetWorldRayOriginKHR", 6030>;
+def SPIRV_OC_OpRayQueryGetIntersectionObjectToWorldKHR       : I32EnumAttrCase<"OpRayQueryGetIntersectionObjectToWorldKHR", 6031>;
+def SPIRV_OC_OpRayQueryGetIntersectionWorldToObjectKHR       : I32EnumAttrCase<"OpRayQueryGetIntersectionWorldToObjectKHR", 6032>;
 def SPIRV_OC_OpBeginInvocationInterlockEXT    : I32EnumAttrCase<"OpBeginInvocationInterlockEXT", 5364>;
 def SPIRV_OC_OpEndInvocationInterlockEXT      : I32EnumAttrCase<"OpEndInvocationInterlockEXT", 5365>;
 def SPIRV_OC_OpDemoteToHelperInvocation       : I32EnumAttrCase<"OpDemoteToHelperInvocation", 5380>;
@@ -4852,6 +4885,7 @@ def SPIRV_OpcodeAttr :
       SPIRV_OC_OpSpecConstantCompositeReplicateEXT,
       SPIRV_OC_OpEmitMeshTasksEXT, SPIRV_OC_OpSetMeshOutputsEXT,
       SPIRV_OC_OpBeginInvocationInterlockEXT, SPIRV_OC_OpEndInvocationInterlockEXT,
+      SPIRV_OC_OpTypeRayQueryKHR, SPIRV_OC_OpRayQueryInitializeKHR, SPIRV_OC_OpRayQueryTerminateKHR, SPIRV_OC_OpRayQueryGenerateIntersectionKHR, SPIRV_OC_OpRayQueryConfirmIntersectionKHR, SPIRV_OC_OpRayQueryProceedKHR, SPIRV_OC_OpRayQueryGetIntersectionTypeKHR, SPIRV_OC_OpTypeAccelerationStructureKHR, SPIRV_OC_OpRayQueryGetRayTMinKHR, SPIRV_OC_OpRayQueryGetRayFlagsKHR, SPIRV_OC_OpRayQueryGetIntersectionTKHR, SPIRV_OC_OpRayQueryGetIntersectionInstanceCustomIndexKHR, SPIRV_OC_OpRayQueryGetIntersectionInstanceIdKHR, SPIRV_OC_OpRayQueryGetIntersectionInstanceShaderBindingTableRecordOffsetKHR, SPIRV_OC_OpRayQueryGetIntersectionGeometryIndexKHR, SPIRV_OC_OpRayQueryGetIntersectionPrimitiveIndexKHR, SPIRV_OC_OpRayQueryGetIntersectionBarycentricsKHR, SPIRV_OC_OpRayQueryGetIntersectionFrontFaceKHR, SPIRV_OC_OpRayQueryGetIntersectionCandidateAABBOpaqueKHR, SPIRV_OC_OpRayQueryGetIntersectionObjectRayDirectionKHR, SPIRV_OC_OpRayQueryGetIntersectionObjectRayOriginKHR, SPIRV_OC_OpRayQueryGetWorldRayDirectionKHR, SPIRV_OC_OpRayQueryGetWorldRayOriginKHR, SPIRV_OC_OpRayQueryGetIntersectionObjectToWorldKHR, SPIRV_OC_OpRayQueryGetIntersectionWorldToObjectKHR,
       SPIRV_OC_OpDemoteToHelperInvocation,
       SPIRV_OC_OpSubgroupBlockReadINTEL, SPIRV_OC_OpSubgroupBlockWriteINTEL,
       SPIRV_OC_OpAssumeTrueKHR, SPIRV_OC_OpExpectKHR, SPIRV_OC_OpAtomicFAddEXT,

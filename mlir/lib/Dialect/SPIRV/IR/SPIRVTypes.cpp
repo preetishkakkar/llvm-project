@@ -59,6 +59,8 @@ public:
             add(elementType);
         })
         .Case<SamplerType, NamedBarrierType>([](auto) { /* no extensions */ })
+        .Case<RayQueryKHRType, AccelerationStructureKHRType>(
+            [this](auto) { pushExts<Extension::SPV_KHR_ray_query>(); })
         .DefaultUnreachable("Unhandled type");
   }
 
@@ -119,6 +121,8 @@ public:
         .Case([](SamplerType) { /* no capabilities */ })
         .Case(
             [this](NamedBarrierType) { pushCaps<Capability::NamedBarrier>(); })
+        .Case<RayQueryKHRType, AccelerationStructureKHRType>(
+            [this](auto) { pushCaps<Capability::RayQueryKHR>(); })
         .DefaultUnreachable("Unhandled type");
   }
 
@@ -875,6 +879,19 @@ NamedBarrierType NamedBarrierType::get(MLIRContext *context) {
 }
 
 //===----------------------------------------------------------------------===//
+// RayQueryKHRType / AccelerationStructureKHRType
+//===----------------------------------------------------------------------===//
+
+RayQueryKHRType RayQueryKHRType::get(MLIRContext *context) {
+  return Base::get(context);
+}
+
+AccelerationStructureKHRType
+AccelerationStructureKHRType::get(MLIRContext *context) {
+  return Base::get(context);
+}
+
+//===----------------------------------------------------------------------===//
 // StructType
 //===----------------------------------------------------------------------===//
 
@@ -1407,7 +1424,8 @@ TensorArmType::verifyInvariants(function_ref<InFlightDiagnostic()> emitError,
 //===----------------------------------------------------------------------===//
 
 void SPIRVDialect::registerTypes() {
-  addTypes<ArrayType, CooperativeMatrixType, ImageType, MatrixType,
-           NamedBarrierType, PointerType, RuntimeArrayType, SampledImageType,
-           SamplerType, StructType, TensorArmType>();
+  addTypes<AccelerationStructureKHRType, ArrayType, CooperativeMatrixType,
+           ImageType, MatrixType, NamedBarrierType, PointerType,
+           RayQueryKHRType, RuntimeArrayType, SampledImageType, SamplerType,
+           StructType, TensorArmType>();
 }
