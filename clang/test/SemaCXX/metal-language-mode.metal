@@ -195,3 +195,11 @@ int coherent = 1;
 struct grid2 { int v[4]; int operator[](int i, int j) const { return v[i * 2 + j]; } };
 int multi_subscript(grid2 g) { return g[1, 0] + g[0, 1]; }
 #endif
+
+// Structural class types as non-type template parameters at every language
+// version: Metal 4 TensorOps take their descriptors as template arguments.
+#ifndef PLAIN_CPP
+struct matmul_shape { int m, n, k; };
+template <matmul_shape S> struct matmul_op { int cells() const { return S.m * S.n + S.k; } };
+int structural_argument() { constexpr matmul_shape s{2, 3, 4}; matmul_op<s> op; return op.cells(); }
+#endif

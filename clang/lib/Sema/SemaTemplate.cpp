@@ -1519,7 +1519,10 @@ QualType Sema::CheckNonTypeTemplateParameterType(QualType T,
   if (RequireStructuralType(T, Loc))
     return QualType();
 
-  if (!getLangOpts().CPlusPlus20) {
+  // Metal mode admits structural class types at every language version, as
+  // Apple's compiler does (Metal 4 TensorOps descriptors are template
+  // arguments); the C++20 evaluation rules apply to them there.
+  if (!getLangOpts().CPlusPlus20 && !getLangOpts().Metal) {
     // FIXME: Consider allowing structural types as an extension in C++17. (In
     // earlier language modes, the template argument evaluation rules are too
     // inflexible.)
@@ -7346,7 +7349,10 @@ ExprResult Sema::CheckTemplateArgument(NamedDecl *Param, QualType ParamType,
     IsConvertedConstantExpression = false;
   }
 
-  if (getLangOpts().CPlusPlus17 || StrictCheck) {
+  // Metal mode checks structural class arguments by the C++17 rules at every
+  // language version (see CheckNonTypeTemplateParameterType).
+  if (getLangOpts().CPlusPlus17 || StrictCheck ||
+      (getLangOpts().Metal && ParamType->isRecordType())) {
     // C++17 [temp.arg.nontype]p1:
     //   A template-argument for a non-type template parameter shall be
     //   a converted constant expression of the type of the template-parameter.
