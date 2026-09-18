@@ -4535,6 +4535,15 @@ def SPIRV_OC_OpImageQuerySizeLod              : I32EnumAttrCase<"OpImageQuerySiz
 def SPIRV_OC_OpImageQuerySize                 : I32EnumAttrCase<"OpImageQuerySize", 104>;
 def SPIRV_OC_OpImageQueryLod                  : I32EnumAttrCase<"OpImageQueryLod", 105>;
 def SPIRV_OC_OpImageQueryLevels               : I32EnumAttrCase<"OpImageQueryLevels", 106>;
+def SPIRV_OC_OpImageSparseSampleImplicitLod   : I32EnumAttrCase<"OpImageSparseSampleImplicitLod", 305>;
+def SPIRV_OC_OpImageSparseSampleExplicitLod   : I32EnumAttrCase<"OpImageSparseSampleExplicitLod", 306>;
+def SPIRV_OC_OpImageSparseSampleDrefImplicitLod : I32EnumAttrCase<"OpImageSparseSampleDrefImplicitLod", 307>;
+def SPIRV_OC_OpImageSparseSampleDrefExplicitLod : I32EnumAttrCase<"OpImageSparseSampleDrefExplicitLod", 308>;
+def SPIRV_OC_OpImageSparseFetch               : I32EnumAttrCase<"OpImageSparseFetch", 313>;
+def SPIRV_OC_OpImageSparseGather              : I32EnumAttrCase<"OpImageSparseGather", 314>;
+def SPIRV_OC_OpImageSparseDrefGather          : I32EnumAttrCase<"OpImageSparseDrefGather", 315>;
+def SPIRV_OC_OpImageSparseTexelsResident      : I32EnumAttrCase<"OpImageSparseTexelsResident", 316>;
+def SPIRV_OC_OpImageSparseRead                : I32EnumAttrCase<"OpImageSparseRead", 320>;
 def SPIRV_OC_OpImageQuerySamples              : I32EnumAttrCase<"OpImageQuerySamples", 107>;
 def SPIRV_OC_OpConvertFToU                    : I32EnumAttrCase<"OpConvertFToU", 109>;
 def SPIRV_OC_OpConvertFToS                    : I32EnumAttrCase<"OpConvertFToS", 110>;
@@ -4810,6 +4819,10 @@ def SPIRV_OpcodeAttr :
       SPIRV_OC_OpImageGather, SPIRV_OC_OpImageDrefGather,
       SPIRV_OC_OpImageRead, SPIRV_OC_OpImageWrite, SPIRV_OC_OpImage,
       SPIRV_OC_OpImageQuerySizeLod, SPIRV_OC_OpImageQuerySize, SPIRV_OC_OpImageQueryLod, SPIRV_OC_OpImageQueryLevels, SPIRV_OC_OpImageQuerySamples,
+      SPIRV_OC_OpImageSparseSampleImplicitLod, SPIRV_OC_OpImageSparseSampleExplicitLod,
+      SPIRV_OC_OpImageSparseSampleDrefImplicitLod, SPIRV_OC_OpImageSparseSampleDrefExplicitLod,
+      SPIRV_OC_OpImageSparseFetch, SPIRV_OC_OpImageSparseGather, SPIRV_OC_OpImageSparseDrefGather,
+      SPIRV_OC_OpImageSparseTexelsResident, SPIRV_OC_OpImageSparseRead,
       SPIRV_OC_OpConvertFToU, SPIRV_OC_OpConvertFToS, SPIRV_OC_OpConvertSToF,
       SPIRV_OC_OpConvertUToF, SPIRV_OC_OpUConvert, SPIRV_OC_OpSConvert,
       SPIRV_OC_OpFConvert, SPIRV_OC_OpConvertPtrToU, SPIRV_OC_OpConvertUToPtr,

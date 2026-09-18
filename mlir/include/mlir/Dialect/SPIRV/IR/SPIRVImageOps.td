@@ -965,4 +965,374 @@ def SPIRV_ImageFetchOp : SPIRV_Op<"ImageFetch",
   }];
 }
 
+// -----
+
+def SPIRV_ImageSparseSampleImplicitLodOp : SPIRV_Op<"ImageSparseSampleImplicitLod",
+    [SPIRV_DimIsNot<"sampled_image", ["Buffer"], SPIRV_SampledImageTransform.result>,
+     SPIRV_MSOperandIs<"sampled_image", ["SingleSampled"], SPIRV_SampledImageTransform.result>]> {
+  let summary = "Sparse: Sample an image with an implicit level of detail.";
+
+  let description = [{
+    The sparse form of ImageSampleImplicitLod (SparseResidency): the result is a struct of the
+    residency code and the texel; OpImageSparseTexelsResident reads the code.
+
+    <!-- End of AutoGen section -->
+  }];
+
+  let availability = [
+    MinVersion<SPIRV_V_1_0>,
+    MaxVersion<SPIRV_V_1_6>,
+    Extension<[]>,
+    Capability<[SPIRV_C_SparseResidency]>
+  ];
+
+  let arguments = (ins
+    SPIRV_AnySampledImage:$sampled_image,
+    SPIRV_ScalarOrVectorOf<SPIRV_Float>:$coordinate,
+    OptionalAttr<SPIRV_ImageOperandsAttr>:$image_operands,
+    Variadic<SPIRV_Type>:$operand_arguments
+  );
+
+  let results = (outs
+    SPIRV_AnyStruct:$result
+  );
+
+  let assemblyFormat = [{
+    $sampled_image `,` $coordinate custom<ImageOperands>($image_operands) ( `,` $operand_arguments^ )? attr-dict
+      `:` type($sampled_image) `,` type($coordinate) ( `,` type($operand_arguments)^ )?
+      `->` type($result)
+  }];
+
+  let hasVerifier = 0;
+}
+
+// -----
+
+def SPIRV_ImageSparseSampleExplicitLodOp : SPIRV_Op<"ImageSparseSampleExplicitLod",
+    [SPIRV_DimIsNot<"sampled_image", ["Buffer"], SPIRV_SampledImageTransform.result>,
+     SPIRV_MSOperandIs<"sampled_image", ["SingleSampled"], SPIRV_SampledImageTransform.result>,
+     SPIRV_ImageOperandIsPresent<"image_operands", ["Lod", "Grad"]>]> {
+  let summary = "Sparse: Sample an image using an explicit level of detail.";
+
+  let description = [{
+    The sparse form of ImageSampleExplicitLod (SparseResidency): the result is a struct of the
+    residency code and the texel; OpImageSparseTexelsResident reads the code.
+
+    <!-- End of AutoGen section -->
+  }];
+
+  let availability = [
+    MinVersion<SPIRV_V_1_0>,
+    MaxVersion<SPIRV_V_1_6>,
+    Extension<[]>,
+    Capability<[SPIRV_C_SparseResidency]>
+  ];
+
+  let arguments = (ins
+    SPIRV_AnySampledImage:$sampled_image,
+    AnyTypeOf<[SPIRV_ScalarOrVectorOf<SPIRV_Float>, SPIRV_ScalarOrVectorOf<SPIRV_Integer>]>:$coordinate,
+    SPIRV_ImageOperandsAttr:$image_operands,
+    Variadic<SPIRV_Type>:$operand_arguments
+  );
+
+  let results = (outs
+    SPIRV_AnyStruct:$result
+  );
+
+  let assemblyFormat = [{
+    $sampled_image `,` $coordinate custom<ImageOperands>($image_operands) ( `,` $operand_arguments^ )? attr-dict
+      `:` type($sampled_image) `,` type($coordinate) ( `,` type($operand_arguments)^ )?
+      `->` type($result)
+  }];
+
+  let hasVerifier = 0;
+}
+
+// -----
+
+def SPIRV_ImageSparseSampleDrefImplicitLodOp : SPIRV_Op<"ImageSparseSampleDrefImplicitLod",
+    [SPIRV_DimIsNot<"sampled_image", ["Buffer"], SPIRV_SampledImageTransform.result>,
+     SPIRV_MSOperandIs<"sampled_image", ["SingleSampled"], SPIRV_SampledImageTransform.result>]> {
+  let summary = "Sparse: Sample an image doing depth-comparison with an implicit level of detail.";
+
+  let description = [{
+    The sparse form of ImageSampleDrefImplicitLod (SparseResidency): the result is a struct of the
+    residency code and the texel; OpImageSparseTexelsResident reads the code.
+
+    <!-- End of AutoGen section -->
+  }];
+
+  let availability = [
+    MinVersion<SPIRV_V_1_0>,
+    MaxVersion<SPIRV_V_1_6>,
+    Extension<[]>,
+    Capability<[SPIRV_C_SparseResidency]>
+  ];
+
+  let arguments = (ins
+    SPIRV_AnySampledImage:$sampled_image,
+    SPIRV_ScalarOrVectorOf<SPIRV_Float>:$coordinate,
+    SPIRV_Float:$dref,
+    OptionalAttr<SPIRV_ImageOperandsAttr>:$image_operands,
+    Variadic<SPIRV_Type>:$operand_arguments
+  );
+
+  let results = (outs
+    SPIRV_AnyStruct:$result
+  );
+
+  let assemblyFormat = [{
+    $sampled_image `,` $coordinate `,` $dref custom<ImageOperands>($image_operands) ( `,` $operand_arguments^ )? attr-dict
+    `:` type($sampled_image) `,` type($coordinate) `,` type($dref) ( `,` type($operand_arguments)^ )?
+    `->` type($result)
+  }];
+
+  let hasVerifier = 0;
+}
+
+// -----
+
+def SPIRV_ImageSparseSampleDrefExplicitLodOp : SPIRV_Op<"ImageSparseSampleDrefExplicitLod",
+    [SPIRV_DimIsNot<"sampled_image", ["Buffer"], SPIRV_SampledImageTransform.result>,
+     SPIRV_MSOperandIs<"sampled_image", ["SingleSampled"], SPIRV_SampledImageTransform.result>,
+     SPIRV_ImageOperandIsPresent<"image_operands", ["Lod", "Grad"]>]> {
+  let summary = "Sparse: Sample an image doing depth-comparison using an explicit level of detail.";
+
+  let description = [{
+    The sparse form of ImageSampleDrefExplicitLod (SparseResidency): the result is a struct of the
+    residency code and the texel; OpImageSparseTexelsResident reads the code.
+
+    <!-- End of AutoGen section -->
+  }];
+
+  let availability = [
+    MinVersion<SPIRV_V_1_0>,
+    MaxVersion<SPIRV_V_1_6>,
+    Extension<[]>,
+    Capability<[SPIRV_C_SparseResidency]>
+  ];
+
+  let arguments = (ins
+    SPIRV_AnySampledImage:$sampled_image,
+    SPIRV_ScalarOrVectorOf<SPIRV_Float>:$coordinate,
+    SPIRV_Float:$dref,
+    SPIRV_ImageOperandsAttr:$image_operands,
+    Variadic<SPIRV_Type>:$operand_arguments
+  );
+
+  let results = (outs
+    SPIRV_AnyStruct:$result
+  );
+
+  let assemblyFormat = [{
+    $sampled_image `,` $coordinate `,` $dref custom<ImageOperands>($image_operands) ( `,` $operand_arguments^ )? attr-dict
+    `:` type($sampled_image) `,` type($coordinate) `,` type($dref) ( `,` type($operand_arguments)^ )?
+    `->` type($result)
+  }];
+
+  let hasVerifier = 0;
+}
+
+// -----
+
+def SPIRV_ImageSparseFetchOp : SPIRV_Op<"ImageSparseFetch",
+    [SPIRV_DimIsNot<"image", ["Cube"]>,
+     SPIRV_SampledOperandIs<"image", ["NeedSampler"]>]> {
+  let summary = "Sparse: Fetch a single texel from an image whose Sampled operand is 1. ";
+
+  let description = [{
+    The sparse form of ImageFetch (SparseResidency): the result is a struct of the
+    residency code and the texel; OpImageSparseTexelsResident reads the code.
+
+    <!-- End of AutoGen section -->
+  }];
+
+  let availability = [
+    MinVersion<SPIRV_V_1_0>,
+    MaxVersion<SPIRV_V_1_6>,
+    Extension<[]>,
+    Capability<[SPIRV_C_SparseResidency]>
+  ];
+
+  let arguments = (ins
+    SPIRV_AnyImage:$image,
+    SPIRV_ScalarOrVectorOf<SPIRV_Integer>:$coordinate,
+    OptionalAttr<SPIRV_ImageOperandsAttr>:$image_operands,
+    Variadic<SPIRV_Type>:$operand_arguments
+  );
+
+  let results = (outs
+    SPIRV_AnyStruct:$result
+  );
+
+  let assemblyFormat = [{
+    $image `,` $coordinate custom<ImageOperands>($image_operands) ( `,` $operand_arguments^ )? attr-dict
+    `:` type($image) `,` type($coordinate) ( `,` type($operand_arguments)^ )?
+    `->` type($result)
+  }];
+
+  let hasVerifier = 0;
+}
+
+// -----
+
+def SPIRV_ImageSparseGatherOp : SPIRV_Op<"ImageSparseGather",
+    [Pure,
+     SPIRV_DimIs<"sampled_image", ["Dim2D", "Cube", "Rect"], SPIRV_SampledImageTransform.result>,
+     SPIRV_MSOperandIs<"sampled_image", ["SingleSampled"], SPIRV_SampledImageTransform.result>]> {
+  let summary = "Sparse: Gathers the requested component from four texels.";
+
+  let description = [{
+    The sparse form of ImageGather (SparseResidency): the result is a struct of the
+    residency code and the texel; OpImageSparseTexelsResident reads the code.
+
+    <!-- End of AutoGen section -->
+  }];
+
+  let availability = [
+    MinVersion<SPIRV_V_1_0>,
+    MaxVersion<SPIRV_V_1_6>,
+    Extension<[]>,
+    Capability<[SPIRV_C_SparseResidency]>
+  ];
+
+  let arguments = (ins
+    SPIRV_AnySampledImage:$sampled_image,
+    SPIRV_ScalarOrVectorOf<SPIRV_Float>:$coordinate,
+    SPIRV_Integer:$component,
+    OptionalAttr<SPIRV_ImageOperandsAttr>:$image_operands,
+    Variadic<SPIRV_Type>:$operand_arguments
+  );
+
+  let results = (outs
+    SPIRV_AnyStruct:$result
+  );
+
+  let assemblyFormat = [{
+    $sampled_image `,` $coordinate `,` $component custom<ImageOperands>($image_operands) ( `,` $operand_arguments^ )? attr-dict
+    `:` type($sampled_image) `,` type($coordinate) `,` type($component) ( `,` type($operand_arguments)^ )?
+    `->` type($result)
+  }];
+
+  let hasVerifier = 0;
+}
+
+// -----
+
+def SPIRV_ImageSparseDrefGatherOp : SPIRV_Op<"ImageSparseDrefGather", 
+    [Pure,
+     SPIRV_DimIs<"sampled_image", ["Dim2D", "Cube", "Rect"], SPIRV_SampledImageTransform.result>,
+     SPIRV_MSOperandIs<"sampled_image", ["SingleSampled"], SPIRV_SampledImageTransform.result>]>{
+  let summary = "Sparse: Gathers the requested depth-comparison from four texels.";
+
+  let description = [{
+    The sparse form of ImageDrefGather (SparseResidency): the result is a struct of the
+    residency code and the texel; OpImageSparseTexelsResident reads the code.
+
+    <!-- End of AutoGen section -->
+  }];
+
+  let availability = [
+    MinVersion<SPIRV_V_1_0>,
+    MaxVersion<SPIRV_V_1_6>,
+    Extension<[]>,
+    Capability<[SPIRV_C_SparseResidency]>
+  ];
+
+  let arguments = (ins
+    SPIRV_AnySampledImage:$sampled_image,
+    SPIRV_ScalarOrVectorOf<SPIRV_Float>:$coordinate,
+    SPIRV_Float32:$dref,
+    OptionalAttr<SPIRV_ImageOperandsAttr>:$image_operands,
+    Variadic<SPIRV_Type>:$operand_arguments
+  );
+
+  let results = (outs
+    SPIRV_AnyStruct:$result
+  );
+
+
+  let assemblyFormat = [{
+    $sampled_image `,` $coordinate `,` $dref custom<ImageOperands>($image_operands) ( `,` $operand_arguments^ )? attr-dict
+    `:` type($sampled_image) `,` type($coordinate) `,` type($dref) ( `,` type($operand_arguments)^ )?
+    `->` type($result) 
+  }];
+
+
+  let hasVerifier = 0;
+}
+
+// -----
+
+def SPIRV_ImageSparseReadOp : SPIRV_Op<"ImageSparseRead",
+    [SPIRV_SampledOperandIs<"image", ["SamplerUnknown", "NoSampler"]>]> {
+  let summary = "Sparse: Read a texel from an image without a sampler.";
+
+  let description = [{
+    The sparse form of ImageRead (SparseResidency): the result is a struct of the
+    residency code and the texel; OpImageSparseTexelsResident reads the code.
+
+    <!-- End of AutoGen section -->
+  }];
+
+  let availability = [
+    MinVersion<SPIRV_V_1_0>,
+    MaxVersion<SPIRV_V_1_6>,
+    Extension<[]>,
+    Capability<[SPIRV_C_SparseResidency]>
+  ];
+
+  let arguments = (ins
+    SPIRV_AnyImage:$image,
+    AnyTypeOf<[SPIRV_ScalarOrVectorOf<SPIRV_Float>, SPIRV_ScalarOrVectorOf<SPIRV_Integer>]>:$coordinate,
+    OptionalAttr<SPIRV_ImageOperandsAttr>:$image_operands,
+    Variadic<SPIRV_Type>:$operand_arguments
+  );
+
+  let results = (outs
+    SPIRV_AnyStruct:$result
+  );
+
+  let assemblyFormat = [{
+    $image `,` $coordinate custom<ImageOperands>($image_operands) ( `,` $operand_arguments^ )? attr-dict
+    `:` type($image) `,` type($coordinate) ( `,` type($operand_arguments)^ )?
+    `->` type($result)
+  }];
+
+  let hasVerifier = 0;
+}
+
+// -----
+
+def SPIRV_ImageSparseTexelsResidentOp : SPIRV_Op<"ImageSparseTexelsResident", [Pure]> {
+  let summary = "Translates a Resident Code into a Boolean.";
+
+  let description = [{
+    Result Type must be a Boolean type scalar. Resident Code is a value from
+    an OpImageSparse* instruction. Result is false if any of the texels were
+    in uncommitted texture memory, true otherwise.
+
+    <!-- End of AutoGen section -->
+  }];
+
+  let availability = [
+    MinVersion<SPIRV_V_1_0>,
+    MaxVersion<SPIRV_V_1_6>,
+    Extension<[]>,
+    Capability<[SPIRV_C_SparseResidency]>
+  ];
+
+  let arguments = (ins
+    SPIRV_Int32:$resident_code
+  );
+
+  let results = (outs
+    SPIRV_Bool:$result
+  );
+
+  let assemblyFormat = "$resident_code attr-dict `:` type($resident_code)";
+
+  let hasVerifier = 0;
+}
+
 #endif // MLIR_DIALECT_SPIRV_IR_IMAGE_OPS
