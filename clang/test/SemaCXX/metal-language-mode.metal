@@ -188,3 +188,10 @@ kernel void coherent_keyword(device coherent float *a, coherent device float *b,
 #else
 int coherent = 1;
 #endif
+
+// Multidimensional subscripts: Metal 4 tensors index as t[i, j], so Metal mode
+// takes the C++23 form at every language version.
+#ifndef PLAIN_CPP
+struct grid2 { int v[4]; int operator[](int i, int j) const { return v[i * 2 + j]; } };
+int multi_subscript(grid2 g) { return g[1, 0] + g[0, 1]; }
+#endif

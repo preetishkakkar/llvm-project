@@ -17106,7 +17106,9 @@ bool Sema::CheckOverloadedOperatorDeclaration(FunctionDecl *FnDecl) {
       << FnDecl->getDeclName() << NumParams << ErrorKind;
   }
 
-  if (Op == OO_Subscript && NumParams != 2) {
+  // Metal mode admits multidimensional operator[] (Metal 4 tensors index as
+  // t[i, j]) at every language version, silently, as Apple's compiler does.
+  if (Op == OO_Subscript && NumParams != 2 && !LangOpts.Metal) {
     Diag(FnDecl->getLocation(), LangOpts.CPlusPlus23
                                     ? diag::ext_subscript_overload
                                     : diag::error_subscript_overload)

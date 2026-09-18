@@ -1732,7 +1732,9 @@ Parser::ParsePostfixExpressionSuffix(ExprResult LHS) {
       // OpenMP/OpenACC sections in the same language mode.
       if ((!getLangOpts().OpenMP && !AllowOpenACCArraySections) ||
           Tok.isNot(tok::colon)) {
-        if (!getLangOpts().CPlusPlus23) {
+        // Metal mode takes the C++23 multidimensional subscript (Metal 4
+        // tensors index as t[i, j]) at every language version.
+        if (!getLangOpts().CPlusPlus23 && !getLangOpts().Metal) {
           ExprResult Idx;
           if (getLangOpts().CPlusPlus11 && Tok.is(tok::l_brace)) {
             Diag(Tok, diag::warn_cxx98_compat_generalized_initializer_lists);
